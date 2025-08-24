@@ -1,7 +1,8 @@
-import { createBrowserRouter } from 'react-router-dom'
-import DashboardLayout from '../layouts/DashboardLayout'
-import Dashboard from '../pages/Dashboard'
-import Placeholder from '../pages/Placeholder'
+import { createBrowserRouter } from 'react-router-dom';
+import DashboardLayout from '../layouts/DashboardLayout';
+import Dashboard from '../pages/Dashboard';
+import NotFound from '../pages/NotFound';
+import Placeholder from '../pages/Placeholder';
 
 export const router = createBrowserRouter([
   {
@@ -17,6 +18,8 @@ export const router = createBrowserRouter([
       { path: 'matrix', element: <Placeholder title="Matrix" /> },
       { path: 'matrix/users', element: <Placeholder title="Matrix Users" /> },
       { path: 'matrix/rooms', element: <Placeholder title="Matrix Rooms" /> },
+
+      { path: '*', element: <NotFound /> },
     ],
   },
 ])
