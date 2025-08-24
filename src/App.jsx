@@ -1,12 +1,11 @@
-import './App.css'
+import { RouterProvider } from 'react-router-dom';
+import { router } from './routes/AppRouter';
 
-function App() {
 
+export default function App() {
   return (
     <>
-      <h1>Jovi frontend</h1>
+      <RouterProvider router={router} />
     </>
   )
 }
-
-export default App
