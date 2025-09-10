@@ -32,7 +32,7 @@ export default function TopNav({ onMenuClick }) {
           >
             {dark ? '☾' : '☀︎'}
           </button>
-          <UserMenu email="example@jovi.co" />
+          <UserMenu />
         </div>
       </div>
     </header>
