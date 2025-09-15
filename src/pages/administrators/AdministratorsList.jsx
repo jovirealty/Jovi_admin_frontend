@@ -159,7 +159,7 @@ export default function AdministratorsList() {
 
           <Link
             to="/administrators/new"
-            className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
+            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
           >
             <svg viewBox="0 0 24 24" className="size-4" fill="currentColor">
               <path d="M11 11V5h2v6h6v2h-6v6h-2v-6H5v-2z" />
@@ -185,7 +185,7 @@ export default function AdministratorsList() {
               setQuery(e.target.value);
               setPage(1);
             }}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none ring-0 placeholder:text-gray-400 focus:border-indigo-500"
+            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none ring-0 placeholder:text-gray-400 focus:border-blue-500"
           />
         </div>
       </div>
@@ -204,7 +204,7 @@ export default function AdministratorsList() {
                       rows.length > 0 && rows.every((r) => selected.has(r.id))
                     }
                     onChange={toggleAll}
-                    className="size-4 rounded border-gray-300 accent-indigo-600"
+                    className="size-4 rounded border-gray-300 accent-blue-600"
                   />
                 </th>
                 <th className="px-4 py-3 font-medium">Name</th>
@@ -223,7 +223,7 @@ export default function AdministratorsList() {
                       aria-label={`Select ${row.name}`}
                       checked={selected.has(row.id)}
                       onChange={() => toggleRow(row.id)}
-                      className="size-4 rounded border-gray-300 accent-indigo-600"
+                      className="size-4 rounded border-gray-300 accent-blue-600"
                     />
                   </td>
                   <td className="px-4 py-3">
