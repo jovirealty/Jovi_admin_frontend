@@ -9,8 +9,8 @@ export default function NotFound() {
       <div className="w-full max-w-3xl rounded-2xl bg-white shadow-sm ring-1 ring-black/5 p-10 dark:bg-neutral-950">
         {/* Eyebrow + code */}
         <div className="mb-6 flex items-center justify-between">
-          <span className="inline-flex items-center gap-2 text-sm font-medium text-indigo-600 dark:text-indigo-400">
-            <span className="h-2 w-2 rounded-full bg-indigo-600 dark:bg-indigo-400" />
+          <span className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 dark:text-blue-400">
+            <span className="h-2 w-2 rounded-full bg-blue-600 dark:bg-blue-400" />
             404
           </span>
 
