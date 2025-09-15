@@ -1,4 +1,8 @@
+import { useEffect } from 'react';
+import { useAuth } from '../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
 import { createBrowserRouter } from 'react-router-dom';
+
 import DashboardLayout from '../layouts/DashboardLayout';
 import Dashboard from '../pages/Dashboard';
 import NotFound from '../pages/NotFound';
@@ -6,10 +10,10 @@ import Placeholder from '../pages/Placeholder';
 import Login from '../pages/auth/Login';
 import ProtectedRoute from './ProtectedRoute';
 import GuestRoute from './GuestRoute';
-
-import { useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useNavigate } from 'react-router-dom';
+import AdministratorsList from '../pages/administrators/AdministratorsList';
+import CreateAdministrator from '../pages/administrators/CreateAdministrator';
+import EditAdministrator from '../pages/administrators/EditAdministrator';
+import AdministratorShowDrawer from '../pages/administrators/AdministratorShowDrawer';
 
 function Logout() {
   const { logout } = useAuth();
@@ -36,7 +40,15 @@ export const router = createBrowserRouter([
         element: <DashboardLayout />,
         children: [
           { index: true, element: <Dashboard /> },
-          { path: 'administrators', element: <Placeholder title="Administrators" /> },
+          {
+            path: "administrators",
+            element: <AdministratorsList />,
+            children: [
+              { path: ":id/show", element: <AdministratorShowDrawer /> },
+            ],
+          },
+          { path: "administrators/:id/edit", element: <EditAdministrator /> },
+          { path: "administrators/new", element: <CreateAdministrator /> },
           { path: 'customers', element: <Placeholder title="Customers" /> },
           { path: 'categories', element: <Placeholder title="Categories" /> },
           { path: 'products', element: <Placeholder title="Products" /> },
