@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Sidebar from '../components/sidebar/Sidebar'
 import TopNav from '../components/topnav/TopNav'
 import { Outlet } from 'react-router-dom'
+import Copyright from '../components/copyright/Copyright'
 
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -15,6 +16,7 @@ export default function DashboardLayout() {
           <Outlet />
         </div>
       </main>
+      <Copyright />
     </div>
   )
 }
