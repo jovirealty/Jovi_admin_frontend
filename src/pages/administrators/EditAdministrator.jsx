@@ -169,10 +169,6 @@ export default function EditAdministrator() {
         </div>
       </form>
 
-      <div className="mx-auto mt-6 max-w-4xl text-center text-xs text-gray-400">
-        © Jovi Realty {new Date().getFullYear()}.
-      </div>
-
       <DeleteConfirm
         open={confirmOpen}
         onCancel={() => setConfirmOpen(false)}
