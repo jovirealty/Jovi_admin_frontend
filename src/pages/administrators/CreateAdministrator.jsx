@@ -82,7 +82,7 @@ export default function CreateAdministrator() {
     <div className="p-6">
       {/* Breadcrumb */}
       <div className="mb-4 text-sm text-gray-500">
-        <Link to="/" className="hover:underline">Dashboard</Link> /{" "}
+        <Link to="/admin/dashboard" className="hover:underline">Dashboard</Link> /{" "}
         <Link to="/admin/administrators" className="hover:underline">Administrators</Link> /{" "}
         <span className="text-gray-700">Create new</span>
       </div>

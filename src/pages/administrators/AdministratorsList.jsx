@@ -128,7 +128,7 @@ export default function AdministratorsList() {
       {/* Header */}
       <div className="mb-4 text-sm text-gray-500">
         <button
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/admin/dashboard")}
           className="hover:underline focus:outline-none"
         >
           Dashboard
