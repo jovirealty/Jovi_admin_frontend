@@ -53,7 +53,7 @@ export default function AdministratorShowDrawer() {
 
   if (!admin) {
     // If no record, just close
-    navigate(`/administrators?page=${page}`, { replace: true });
+    navigate(`/admin/administrators?page=${page}`, { replace: true });
     return null;
   }
 
@@ -62,14 +62,14 @@ export default function AdministratorShowDrawer() {
       {/* Backdrop */}
       <div
         className="fixed inset-0 z-40 bg-black/30"
-        onClick={() => navigate(`/administrators?page=${page}`)}
+        onClick={() => navigate(`/admin/administrators?page=${page}`)}
       />
       {/* Drawer */}
       <aside className="fixed right-0 top-0 z-50 h-full w-[420px] overflow-y-auto border-l border-gray-200 bg-white p-6">
         <div className="mb-6 flex items-center justify-between">
           <button
             aria-label="Close"
-            onClick={() => navigate(`/administrators?page=${page}`)}
+            onClick={() => navigate(`/admin/administrators?page=${page}`)}
             className="inline-flex size-9 items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50"
             title="Close"
           >
@@ -80,7 +80,7 @@ export default function AdministratorShowDrawer() {
 
           <div className="flex items-center gap-3">
             <Link
-              to={`/administrators/${id}/edit?page=${page}`}
+              to={`/admin/administrators/${id}/edit?page=${page}`}
               className="rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
             >
               Edit
@@ -137,7 +137,7 @@ export default function AdministratorShowDrawer() {
         onConfirm={() => {
           setConfirmOpen(false);
           alert("Deleted (demo). Hook API call here.");
-          navigate(`/administrators?page=${page}`);
+          navigate(`/admin/administrators?page=${page}`);
         }}
       />
     </>
