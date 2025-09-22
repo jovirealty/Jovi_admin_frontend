@@ -64,7 +64,7 @@ export default function EditAdministrator() {
       {/* Breadcrumb */}
       <div className="mb-4 flex items-center justify-between">
         <div className="text-sm text-gray-500">
-          <Link to="/" className="hover:underline">Dashboard</Link> /{" "}
+          <Link to="/admin/dashboard" className="hover:underline">Dashboard</Link> /{" "}
           <Link to={`/admin/administrators?page=${page}`} className="hover:underline">Administrators</Link>{" "}
           / <span className="text-gray-700">Edit</span>
         </div>
