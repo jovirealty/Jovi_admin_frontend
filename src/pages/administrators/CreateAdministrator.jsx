@@ -83,7 +83,7 @@ export default function CreateAdministrator() {
       {/* Breadcrumb */}
       <div className="mb-4 text-sm text-gray-500">
         <Link to="/" className="hover:underline">Dashboard</Link> /{" "}
-        <Link to="/administrators" className="hover:underline">Administrators</Link> /{" "}
+        <Link to="/admin/administrators" className="hover:underline">Administrators</Link> /{" "}
         <span className="text-gray-700">Create new</span>
       </div>
 
@@ -206,7 +206,7 @@ export default function CreateAdministrator() {
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2">
             <Link
-              to="/administrators"
+              to="/admin/administrators"
               className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
             >
               Cancel

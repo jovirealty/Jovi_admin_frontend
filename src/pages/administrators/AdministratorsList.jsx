@@ -114,8 +114,8 @@ export default function AdministratorsList() {
     });
   };
 
-  const goShow = (id) => navigate(`/administrators/${id}/show?page=${page}`);
-  const goEdit = (id) => navigate(`/administrators/${id}/edit?page=${page}`);
+  const goShow = (id) => navigate(`/admin/administrators/${id}/show?page=${page}`);
+  const goEdit = (id) => navigate(`/admin/administrators/${id}/edit?page=${page}`);
 
   const handleDelete = (id) => {
     // Frontend-only simulation: remove from current list
@@ -158,7 +158,7 @@ export default function AdministratorsList() {
           </button>
 
           <Link
-            to="/administrators/new"
+            to="/admin/administrators/new"
             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500"
           >
             <svg viewBox="0 0 24 24" className="size-4" fill="currentColor">

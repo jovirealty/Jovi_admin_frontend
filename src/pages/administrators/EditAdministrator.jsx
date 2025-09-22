@@ -45,7 +45,7 @@ export default function EditAdministrator() {
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   if (!record) {
-    navigate(`/administrators?page=${page}`, { replace: true });
+    navigate(`/admin/administrators?page=${page}`, { replace: true });
     return null;
   }
 
@@ -55,7 +55,7 @@ export default function EditAdministrator() {
     setTimeout(() => {
       setSaving(false);
       alert("Saved (demo).");
-      navigate(`/administrators?page=${page}`);
+      navigate(`/admin/administrators?page=${page}`);
     }, 600);
   };
 
@@ -65,13 +65,13 @@ export default function EditAdministrator() {
       <div className="mb-4 flex items-center justify-between">
         <div className="text-sm text-gray-500">
           <Link to="/" className="hover:underline">Dashboard</Link> /{" "}
-          <Link to={`/administrators?page=${page}`} className="hover:underline">Administrators</Link>{" "}
+          <Link to={`/admin/administrators?page=${page}`} className="hover:underline">Administrators</Link>{" "}
           / <span className="text-gray-700">Edit</span>
         </div>
 
         <div className="flex items-center gap-3">
           <Link
-            to={`/administrators/${id}/show?page=${page}`}
+            to={`/admin/administrators/${id}/show?page=${page}`}
             className="rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
           >
             Show
@@ -153,7 +153,7 @@ export default function EditAdministrator() {
           <div className="flex items-center justify-center gap-3 pt-4">
             <button
               type="button"
-              onClick={() => navigate(`/administrators?page=${page}`)}
+              onClick={() => navigate(`/admin/administrators?page=${page}`)}
               className="rounded-lg bg-blue-50 px-5 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100"
             >
               Cancel
@@ -175,7 +175,7 @@ export default function EditAdministrator() {
         onConfirm={() => {
           setConfirmOpen(false);
           alert("Deleted (demo). Hook API call here.");
-          navigate(`/administrators?page=${page}`);
+          navigate(`/admin/administrators?page=${page}`);
         }}
       />
     </div>
