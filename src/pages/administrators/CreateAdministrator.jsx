@@ -1,86 +1,131 @@
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import { validateFields, EMAIL_RE } from "../../util/validations/validation";
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { EMAIL_RE } from "../../util/validations/validation";
 import { genPassword } from "../../util/generate/generatePassword";
-
-// Simulated lookup — replace with real API call to jovidb.agentlists
-async function fetchAgentIdByEmail(email) {
-  if (!EMAIL_RE.test(email)) return null;
-  try {
-    // TODO: real endpoint:
-    // const res = await fetch(`/api/agentlists?email=${encodeURIComponent(email)}`);
-    // if (!res.ok) return null;
-    // const { id } = await res.json();
-    // return id ?? null;
-
-    const base = Array.from(email).reduce((a, c) => (a + c.charCodeAt(0)) % 9973, 0);
-    return email ? 1000 + (base % 9000) : null;
-  } catch {
-    return null;
-  }
-}
+import { createStaffAccount, lookupAgentByEmail } from "../../hooks/useStaffAccounts";
 
 export default function CreateAdministrator() {
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");          // start empty
-  const [showPassword, setShowPassword] = useState(false); // NEW: toggle
-  const [superAdmin, setSuperAdmin] = useState(false);
-  const [agentId, setAgentId] = useState(null);
-  const [checkingId, setCheckingId] = useState(false);
+  const navigate = useNavigate();
 
-  const [errors, setErrors] = useState({ email: "", name: "", password: "" });
+  // form fields
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [superAdmin, setSuperAdmin] = useState(false);
+
+  // lookup result (for agents)
+  const [agent, setAgent] = useState(null); // { id, fullName, email, joviEmail } | null
+  const [checking, setChecking] = useState(false);
+
+  // name input is only shown for super admins
+  const [nameInput, setNameInput] = useState("");
+
+  // errors
+  const [errEmail, setErrEmail] = useState("");
+  const [errName, setErrName] = useState("");
+  const [errPassword, setErrPassword] = useState("");
+  const [formError, setFormError] = useState("");
+
   const [saving, setSaving] = useState(false);
 
+  // derived “name to save”
+  const nameToSave = useMemo(() => {
+    if (superAdmin) return nameInput.trim();
+    return agent?.fullName?.trim() || "";
+  }, [superAdmin, nameInput, agent]);
+
+  // validate simple
   const validate = () => {
-    const { isValid, errors } = validateFields({ email, name, password });
-    setErrors(errors);
-    return isValid;
-  };
+    let ok = true;
+    setErrEmail("");
+    setErrName("");
+    setErrPassword("");
+    setFormError("");
 
-  const onEmailBlur = async () => {
     if (!EMAIL_RE.test(email)) {
-      setAgentId(null);
-      return;
+      setErrEmail("Enter a valid email.");
+      ok = false;
     }
-    setCheckingId(true);
-    const id = await fetchAgentIdByEmail(email);
-    setAgentId(id);
-    setCheckingId(false);
+    if (!password || password.length < 8) {
+      setErrPassword("Password must be at least 8 characters.");
+      ok = false;
+    }
+
+    if (superAdmin) {
+      if (!nameInput.trim()) {
+        setErrName("Name is required for super admins.");
+        ok = false;
+      }
+    } else {
+      // agent flow → must have a lookup hit
+      if (!agent?.id) {
+        setFormError("No agent found for this email. Please use an email that exists in agentlists.");
+        ok = false;
+      }
+    }
+
+    return ok;
   };
 
-  const onGenerate = () => {
-    setPassword(genPassword(8)); // generate on click
+  // lookup handler
+  const runLookup = async () => {
+    setAgent(null);
+    setFormError("");
+    if (!EMAIL_RE.test(email) || superAdmin) return; // skip for invalid email or super admin flow
+    setChecking(true);
+    try {
+      const data = await lookupAgentByEmail(email);
+      setAgent(data); // may be null if 404
+    } catch (e) {
+      setFormError(e.message || "Lookup failed");
+    } finally {
+      setChecking(false);
+    }
   };
 
+  // generate password
+  const onGenerate = () => setPassword(genPassword(8));
+
+  // submit
   const onSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     const role = superAdmin ? "superadmin" : "agent";
 
-    // Ensure latest agentId (if user didn't blur email)
-    let id = agentId;
-    if (!id) id = await fetchAgentIdByEmail(email);
-
     const payload = {
-      email,
-      name,
+      email: email.trim(),
+      name: nameToSave,                 // name from lookup (agent) OR input (super admin)
       password,
       role,
-      superAdmin,
-      agentId: id ?? null,
+      // if you want to pass explicit id (optional; backend can also look it up)
+      ...(agent?.id && !superAdmin ? { agentLists: { id: agent.id } } : {}),
     };
 
-    console.log("NEW_ADMIN_PAYLOAD", payload);
-
     setSaving(true);
-    setTimeout(() => setSaving(false), 500);
+    setFormError("");
+    try {
+      console.log(`Creating account with payload:`, payload);
+      await createStaffAccount(payload);
+      navigate("/admin/administrators"); // success
+    } catch (err) {
+      setFormError(err.message || "Failed to create account");
+    } finally {
+      setSaving(false);
+    }
   };
+
+  // whenever email changes in agent flow, clear prior results
+  useEffect(() => {
+    if (!superAdmin) {
+      setAgent(null);
+      setFormError("");
+    }
+  }, [email, superAdmin]);
 
   return (
     <div className="p-6">
-      {/* Breadcrumb */}
+      {/* breadcrumbs */}
       <div className="mb-4 text-sm text-gray-500">
         <Link to="/admin/dashboard" className="hover:underline">Dashboard</Link> /{" "}
         <Link to="/admin/administrators" className="hover:underline">Administrators</Link> /{" "}
@@ -102,41 +147,52 @@ export default function CreateAdministrator() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onBlur={onEmailBlur}
+              onBlur={runLookup}
               className={[
                 "rounded-lg border px-3 py-2 text-sm outline-none focus:border-indigo-500",
-                errors.email ? "border-red-300" : "border-gray-300",
+                errEmail ? "border-red-300" : "border-gray-300",
               ].join(" ")}
               placeholder="name@jovirealty.com"
             />
-            {errors.email && <p className="text-xs text-red-600">{errors.email}</p>}
-            <div className="text-xs text-gray-500">
-              {checkingId
-                ? "Checking agent list…"
-                : agentId
-                ? <>Agent exists with ID <span className="font-medium">{agentId}</span></>
-                : "No agent ID found yet"}
+            {errEmail && <p className="text-xs text-red-600">{errEmail}</p>}
+
+            {/* Lookup status */}
+            {!superAdmin && (
+              <div className="text-xs text-gray-500">
+                {checking ? "Checking agent list…" :
+                  agent?.id ? (
+                    <>
+                      Agent found: <span className="font-medium">{agent.fullName}</span>{" "}
+                      <span className="text-gray-400">(# {agent.id})</span>
+                    </>
+                  ) : (
+                    "No agent ID found yet"
+                  )
+                }
+              </div>
+            )}
+          </div>
+
+          {/* Name (only for super admins) */}
+          {superAdmin && (
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-gray-700">Name</label>
+              <input
+                type="text"
+                required
+                value={nameInput}
+                onChange={(e) => setNameInput(e.target.value)}
+                className={[
+                  "rounded-lg border px-3 py-2 text-sm outline-none focus:border-indigo-500",
+                  errName ? "border-red-300" : "border-gray-300",
+                ].join(" ")}
+                placeholder="Full name"
+              />
+              {errName && <p className="text-xs text-red-600">{errName}</p>}
             </div>
-          </div>
+          )}
 
-          {/* Name */}
-          <div className="grid gap-2">
-            <label className="text-sm font-medium text-gray-700">Name</label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className={[
-                "rounded-lg border px-3 py-2 text-sm outline-none focus:border-indigo-500",
-                errors.name ? "border-red-300" : "border-gray-300",
-              ].join(" ")}
-              placeholder="Full name"
-            />
-            {errors.name && <p className="text-xs text-red-600">{errors.name}</p>}
-          </div>
-
-          {/* Password + Generate + Show/Hide */}
+          {/* Password */}
           <div className="grid gap-2">
             <label className="text-sm font-medium text-gray-700">Password</label>
             <div className="flex gap-2">
@@ -148,7 +204,7 @@ export default function CreateAdministrator() {
                   onChange={(e) => setPassword(e.target.value)}
                   className={[
                     "w-full rounded-lg border px-3 py-2 pr-10 text-sm outline-none focus:border-indigo-500",
-                    errors.password ? "border-red-300" : "border-gray-300",
+                    errPassword ? "border-red-300" : "border-gray-300",
                   ].join(" ")}
                   placeholder="Click Generate or type…"
                   inputMode="text"
@@ -161,12 +217,10 @@ export default function CreateAdministrator() {
                   title={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? (
-                    // eye-off
                     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-10-8-10-8a19.6 19.6 0 0 1 5.06-6.94M9.9 4.24A10.94 10.94 0 0 1 12 4c7 0 10 8 10 8a19.6 19.6 0 0 1-3.22 4.49M2 2l20 20" />
                     </svg>
                   ) : (
-                    // eye
                     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M1 12s3-8 11-8 11 8 11 8-3 8-11 8-11-8-11-8z" />
                       <circle cx="12" cy="12" r="3" />
@@ -187,11 +241,11 @@ export default function CreateAdministrator() {
             <p className="text-xs text-gray-500">
               8 characters, must include symbol, uppercase, lowercase, and number.
             </p>
-            {errors.password && <p className="text-xs text-red-600">{errors.password}</p>}
+            {errPassword && <p className="text-xs text-red-600">{errPassword}</p>}
           </div>
 
           {/* Role via Super Admin checkbox */}
-          <label className="flex items-center gap-3">
+          {/* <label className="flex items-center gap-3">
             <input
               type="checkbox"
               checked={superAdmin}
@@ -201,7 +255,14 @@ export default function CreateAdministrator() {
             <span className="text-sm text-gray-700">
               Super Admin? <span className="text-gray-500">(unchecked = agent)</span>
             </span>
-          </label>
+          </label> */}
+
+          {/* Form error */}
+          {formError && (
+            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+              {formError}
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex items-center justify-end gap-3 pt-2">
