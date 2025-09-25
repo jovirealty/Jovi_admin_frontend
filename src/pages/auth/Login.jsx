@@ -32,7 +32,10 @@ export default function Login() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if(!loading && user) navigate("/", { replace: true });
+    if (!loading && user) {
+      const isSuper = user.roles?.includes('superadmin');
+      navigate(isSuper ? '/admin' : '/agent', { replace: true });
+    }
   }, [loading, user, navigate]);
 
   async function onSubmit(e) {
@@ -40,11 +43,14 @@ export default function Login() {
     setError("");
     try {
       const u = await login(email, password);
-      if(!u.roles?.includes("superadmin")) {
-        setError("Superadmin access required.");
+
+      const isSuper = u.roles?.includes('superadmin');
+      const isAgent = u.roles?.includes('agent');
+      if (!isSuper && !isAgent) {
+        setError('staff access required.');
         return;
       }
-      navigate('/', { replace: true });
+      navigate(isSuper ? '/admin' : '/agent', { replace: true });
     } catch (err) {
       setError(err.message || "Failed to login");
     }

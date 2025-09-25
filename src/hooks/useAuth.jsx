@@ -5,24 +5,36 @@ const API = import.meta.env.VITE_API_BASE;
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
-    const [accessToken, setAccessToken] = useState(null);
+    const [accessToken, setAccessToken] = useState(() => localStorage.getItem("accessToken") || null);
     const [loading, setLoading] = useState(true);
 
     // try refresh on load
     useEffect(() => {
-        fetch(`${API}/auth/refresh`, { method: "POST", credentials: "include" })
-            .then(response => (response.ok ? response.json() : null))
-            .then(data => {
-                if(data?.accessToken) {
-                    setAccessToken(data.accessToken);
-                    return fetch(`${API}/auth/me`, {
-                        credentials: "include",
-                        headers: { Authorization: `Bearer ${data.accessToken}` }
-                    }).then(res => (res.ok ? res.json() : null));
+        (async () => {
+            try {
+                const r = await fetch(`${API}/auth/refresh`, {
+                method: "POST",
+                credentials: "include",
+                });
+                if (!r.ok) return;
+                const data = await r.json();
+                if (!data?.accessToken) return;
+
+                setAccessToken(data.accessToken);
+                localStorage.setItem("accessToken", data.accessToken);
+
+                const meRes = await fetch(`${API}/auth/me`, {
+                    credentials: "include",
+                    headers: { Authorization: `Bearer ${data.accessToken}` },
+                });
+                if (meRes.ok) {
+                    const me = await meRes.json();
+                    setUser(me || null);
                 }
-            })
-            .then(me => setUser(me || null))
-            .finally(() => setLoading(false));
+            } finally {
+                setLoading(false);
+            }
+        })();
     }, []);
 
     const login = async (email, password) => {
