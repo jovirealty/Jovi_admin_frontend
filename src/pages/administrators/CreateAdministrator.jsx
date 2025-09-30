@@ -274,7 +274,7 @@ export default function CreateAdministrator() {
             </Link>
             <button
               type="submit"
-              disabled={saving}
+              disabled={formError || checking || saving || !email || !password || (!superAdmin && !agent?.id)}
               className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save"}
