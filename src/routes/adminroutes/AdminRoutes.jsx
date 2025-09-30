@@ -38,7 +38,7 @@ const adminRoutes = {
                 { path: 'matrix/users', element: <Placeholder title="Matrix Users" /> },
                 { path: 'matrix/rooms', element: <Placeholder title="Matrix Rooms" /> },
 
-                { path: '*', element: <NotFound /> },
+                { path: '/admin/*', element: <NotFound /> },
             ],
         }
     ],
