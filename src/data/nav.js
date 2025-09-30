@@ -1,15 +1,20 @@
-export const NAV = [
-  { label: 'Dashboard', to: '/admin/dashboard' },
-  { label: 'Administrators', to: '/admin/administrators' },
-  { label: 'Customers', to: '/admin/customers' },
-  { label: 'Categories', to: '/admin/categories' },
-  { label: 'Products', to: '/admin/products' },
-  { label: 'Orders', to: '/admin/orders' },
-  {
-    label: 'Matrix',
-    children: [
-      { label: 'Matrix Users', to: '/admin/matrix/users' },
-      { label: 'Matrix Rooms', to: '/admin/matrix/rooms' },
-    ],
-  },
-];
+export const NAV = {
+  superadmin: [
+    { to: '/admin/dashboard', icon: 'home', label: 'Dashboard' },
+    { to: '/admin/administrators', icon: 'users', label: 'Administrators' },
+    { to: '/admin/customers', icon: 'user-round', label: 'Customers' },
+    { label: 'Matrix', icon: 'layers', children: [
+        { to: '/admin/matrix/users', label: 'Matrix Users' },
+        { to: '/admin/matrix/rooms', label: 'Matrix Rooms' },
+      ]
+    },
+    // …more
+  ],
+  agent: [
+    { to: '/agent/dashboard', icon: 'home', label: 'Dashboard' },
+    { to: '/agent/learn', icon: 'book', label: 'Learn' },
+    { to: '/agent/properties', icon: 'building', label: 'Properties' },
+    { to: '/agent/orders', icon: 'shopping-bag', label: 'Orders' },
+    // …more agent items
+  ],
+};
