@@ -1,4 +1,3 @@
-// src/pages/administrators/AdministratorShowDrawer.jsx
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getStaffAccount } from "../../hooks/useStaffAccounts";
@@ -32,6 +31,7 @@ function DeleteConfirm({ open, onCancel, onConfirm }) {
 
 export default function AdministratorShowDrawer() {
   const { id } = useParams();
+  console.log("agent value of the ID: ", id)
   const [searchParams] = useSearchParams();
   const page = searchParams.get("page") || "1";
   const navigate = useNavigate();
@@ -93,7 +93,7 @@ export default function AdministratorShowDrawer() {
               </button>
               <div className="flex items-center gap-3">
                 <Link
-                  to={`/admin/administrators/${admin.agentListId}/edit`}
+                  to={`/admin/administrators/${admin._id}/edit`}
                   className="rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
                 >
                   Edit

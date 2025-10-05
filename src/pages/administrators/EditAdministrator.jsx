@@ -1,115 +1,134 @@
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getStaffAccount, updateAgentAndStaffProfile } from "../../hooks/useStaffAccounts";
 
-// ————————————————————————————————————————————————
-// Helper (mock) — keep your existing data fetching
-const findAdministrator = (id) => {
-  return {
-    fullName: "Sample Administrator",
-    licenseNumber: "123456",
-    email: "sample.admin@jovirealty.com",
-    isSuperAdmin: false,
-    personalRealEstateCorporationName: "Jovi Realty Corp",
-    phoneNumber: "6041234567",
-    aboutUs:
-      "Sample bio for administrator with experience in real estate management.",
-    photoUrl:
-      "https://media-jovirealty.s3.ca-central-1.amazonaws.com/Admins/AdminProfiles/sample-admin.jpg",
-    accountActive: true,
-  };
-};
-
-function DeleteConfirm({ open, onCancel, onConfirm }) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
-      <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-6 shadow-xl sm:w-[520px]">
-        <div className="mb-2 text-base font-semibold text-gray-900">Confirm</div>
-        <p className="mb-6 text-sm text-gray-600">Do you really want to remove this administrator?</p>
-        <div className="flex items-center justify-end gap-3">
-          <button onClick={onCancel} className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50">Cancel</button>
-          <button onClick={onConfirm} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500">Confirm</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// Small inline switch
-function Switch({ checked, onChange }) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${checked ? "bg-blue-600" : "bg-gray-300"}`}
-      aria-pressed={checked}
-    >
-      <span
-        className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${checked ? "translate-x-5" : "translate-x-1"}`}
-      />
-    </button>
-  );
-}
+// Helper to format dates for readonly display
+const fmt = (v) => (v ? new Date(v).toLocaleString() : "—");
 
 export default function EditAdministrator() {
-  const { agentListId } = useParams();
+  const { id } = useParams(); // staff account _id
   const [searchParams] = useSearchParams();
   const page = searchParams.get("page") || "1";
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
-  const record = findAdministrator(agentListId);
-  const [fullName, setFullName] = useState(record?.fullName || "");
-  const [email, setEmail] = useState(record?.email || "");
-  const [phoneNumber, setPhoneNumber] = useState(record?.phoneNumber || "");
-  const [aboutUs, setAboutUs] = useState(record?.aboutUs || "");
-  const [personalRealEstateCorporationName, setPersonalRealEstateCorporationName] = useState(
-    record?.personalRealEstateCorporationName || "Jovi Realty Corp"
-  );
-  const [isSuperAdmin, setIsSuperAdmin] = useState(record?.isSuperAdmin || false);
-  const [accountActive, setAccountActive] = useState(record?.accountActive ?? true);
-  const [photoPreview, setPhotoPreview] = useState(record?.photoUrl || "");
-  const [selectedFile, setSelectedFile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState("");
   const [saving, setSaving] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [errors, setErrors] = useState({});
+
+  // Raw payload fetched from API (combined view of staff + agentLists)
+  const [admin, setAdmin] = useState(null);
+
+  // Editable fields
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [mlsId, setMlsId] = useState("");
+  const [licenseNumber, setLicenseNumber] = useState("");
+  const [licensedAs, setLicensedAs] = useState("");
+  const [licensedFor, setLicensedFor] = useState("");
+  const [personalRealEstateCorporationName, setPrecName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [teamName, setTeamName] = useState("");
+  const [aboutUs, setAboutUs] = useState("");
+  const [photoUrl, setPhotoUrl] = useState("");
+  const [joviEmail, setJoviEmail] = useState("");
+  const [knownAs, setKnownAs] = useState("");
+  const [photoFile, setPhotoFile] = useState(null);
+
+  // Non-editable reference data
+  const [agentListId, setAgentListId] = useState("");
+  const [roles, setRoles] = useState([]);
+  const [lastLoginAt, setLastLoginAt] = useState("");
+  const [createdAt, setCreatedAt] = useState("");
+  const [updatedAt, setUpdatedAt] = useState("");
 
   useEffect(() => {
-    if (selectedFile) {
-      const reader = new FileReader();
-      reader.onloadend = () => setPhotoPreview(reader.result);
-      reader.readAsDataURL(selectedFile);
-    }
-  }, [selectedFile]);
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        setErr("");
+        const data = await getStaffAccount(id);
+        if (cancelled) return;
+        setAdmin(data);
+        // Prefill
+        setFullName(data.fullName || "");
+        setEmail(data.email || "");
+        setMlsId(data.mlsId || "");
+        setLicenseNumber(data.licenseNumber || "");
+        setLicensedAs(data.licensedAs || "");
+        setLicensedFor(data.licensedFor || "");
+        setPrecName(data.personalRealEstateCorporationName || "");
+        setPhoneNumber(data.phoneNumber || "");
+        setTeamName(data.teamName || "");
+        setAboutUs(data.aboutUs || "");
+        setPhotoUrl(data.photoUrl || "");
+        setJoviEmail(data.joviEmail || "");
+        setKnownAs(data.knownAs || "");
+        setAgentListId(data.agentListId || "");
+        setRoles(Array.isArray(data.roles) ? data.roles : []);
+        setLastLoginAt(data.lastLoginAt || "");
+        setCreatedAt(data.createdAt || "");
+        setUpdatedAt(data.updatedAt || "");
+      } catch (e) {
+        if (!cancelled) setErr(e?.message || "Failed to load administrator");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id]);
 
-  const validateForm = () => {
-    const newErrors = {};
-    if (!fullName.trim()) newErrors.fullName = "Full name is required.";
-    else if (!/^[a-zA-Z\s-]+$/.test(fullName)) newErrors.fullName = "Use letters, spaces, and hyphens only.";
-    if (email && !/\S+@\S+\.\S+/.test(email)) newErrors.email = "Invalid email format.";
-    if (!/^\d{10}$/.test(phoneNumber.replace(/\D/g, ""))) newErrors.phoneNumber = "10-digit number required.";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  // Decide which email is locked for auth (cannot change)
+  const authEmail = (admin?.email || '').toLowerCase();
+  const lockEmail     = !!authEmail && authEmail === (email || '').toLowerCase();
+  const lockJoviEmail = !!authEmail && authEmail === (joviEmail || '').toLowerCase();
+  const emailHelp = "This email is used for authentication. If you want to change it, please contact an administrator.";
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
-    setSaving(true);
-    setTimeout(() => {
+    try {
+      setSaving(true);
+      const payload = {
+        fullName,
+        knownAs,
+        licensedAs,
+        licensedFor,
+        personalRealEstateCorporationName,
+        phoneNumber,
+        aboutUs,
+      };
+      if (!lockEmail) payload.email = email;
+      if (!lockJoviEmail) payload.joviEmail = joviEmail;
+
+      await updateAgentAndStaffProfile(id, payload, photoFile || undefined);
+      // Redirect to SHOW (route expects agentListId)
+      navigate(`/admin/administrators/${agentListId}/show?page=${page}`);
+    } catch (e2) {
+      alert(e2?.message || "Failed to save");
+    } finally {
       setSaving(false);
-      alert("Administrator updated (demo).");
-      navigate(`/admin/administrators?page=${page}`);
-    }, 600);
+    }
   };
 
-  const handlePhotoClick = () => fileInputRef.current?.click();
-  const handleUploadToServer = () => alert("Image uploaded to server (demo).");
+  const readOnlyFields = useMemo(
+    () => [
+      { label: "_id (staff account)", value: id },
+      { label: "agentListId", value: agentListId },
+      { label: "roles", value: roles.join(", ") || "—" },
+      { label: "lastLoginAt", value: fmt(lastLoginAt) },
+      { label: "createdAt", value: fmt(createdAt) },
+      { label: "updatedAt", value: fmt(updatedAt) },
+    ],
+    [id, agentListId, roles, lastLoginAt, createdAt, updatedAt]
+  );
+
+  if (loading) return <div className="p-8 text-sm text-gray-600">Loading…</div>;
+  if (err) return <div className="p-8 text-sm text-red-600">{err}</div>;
 
   return (
     <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
-      {/* Breadcrumb + actions */}
-      <div className="mb-6 flex flex-col justify-between gap-3 sm:flex-row sm:items-center lg:mb-8">
+      <div className="mb-6 flex items-center justify-between">
         <nav className="text-sm text-gray-500">
           <Link to="/admin/dashboard" className="hover:underline">Dashboard</Link>
           <span className="mx-1">/</span>
@@ -117,218 +136,134 @@ export default function EditAdministrator() {
           <span className="mx-1">/</span>
           <span className="text-gray-700">Edit</span>
         </nav>
-        <div className="flex items-center gap-3">
-          <Link
-            to={`/admin/administrators/${agentListId}/show?page=${page}`}
-            className="rounded-xl border border-blue-600 px-3 py-2 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
-          >
-            Show
-          </Link>
-          <button
-            onClick={() => setConfirmOpen(true)}
-            className="rounded-xl border border-red-600 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
-          >
-            Delete
-          </button>
-        </div>
       </div>
 
-      {/* Unified white container so the gap between columns is white */}
-      <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 lg:p-8">
+      <form onSubmit={onSubmit} className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-gray-200 lg:p-8">
+        <h1 className="mb-6 text-xl font-semibold text-gray-900">Edit administrator</h1>
+
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:gap-8">
-          {/* LEFT: Profile (kept, improved) */}
-          <aside className="lg:col-span-4 xl:col-span-3">
-            <div className="rounded-2xl p-2">
-              <div className="flex flex-col items-center text-center">
-                {/* Avatar — SQUARE with rounded border */}
-                <div className="relative">
-                  {photoPreview ? (
-                    <img
-                      src={photoPreview}
-                      alt="Administrator"
-                      className="h-28 w-28 rounded-2xl object-cover shadow-sm ring-1 ring-gray-200"
-                    />
-                  ) : (
-                    <div className="flex h-28 w-28 items-center justify-center rounded-2xl bg-gray-100 text-2xl font-semibold text-gray-400 ring-1 ring-gray-200">
-                      {fullName?.[0] || "A"}
-                    </div>
-                  )}
+          {/* Avatar card */}
+          <div className="lg:col-span-4 xl:col-span-3">
+            <div className="rounded-2xl border border-gray-200 p-4">
+              <div className="flex items-center gap-4">
+                {photoUrl ? (
+                  <img src={photoUrl} alt="Avatar" className="h-24 w-24 rounded-2xl object-cover ring-1 ring-gray-200" />
+                ) : (
+                  <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-gray-100 text-gray-400 ring-1 ring-gray-200">Avatar</div>
+                )}
+                <div>
                   <button
-                    onClick={handlePhotoClick}
-                    className="absolute -bottom-2 -right-2 rounded-xl bg-white p-2 shadow ring-1 ring-gray-300 hover:bg-gray-50"
-                    title="Change photo"
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
                   >
-                    <svg viewBox="0 0 20 20" className="h-4 w-4 text-gray-700">
-                      <path d="M4 5a2 2 0 012-2h2l1-1h2l1 1h2a2 2 0 012 2v10a2 2 0 01-2 2H6a2 2 0 01-2-2V5z" fill="currentColor" />
-                    </svg>
+                    Change avatar
                   </button>
+                  <p className="mt-2 text-xs text-gray-500">JPG, GIF or PNG. 1MB max.</p>
                   <input
                     ref={fileInputRef}
                     type="file"
                     accept="image/*"
                     className="hidden"
-                    onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                    onChange={(e) => setPhotoFile(e.target.files?.[0] || null)}
                   />
                 </div>
+              </div>
+              <label className="mt-4 block text-sm font-medium text-gray-700">photoUrl</label>
+              <input
+                type="text"
+                value={photoUrl}
+                onChange={(e) => setPhotoUrl(e.target.value)}
+                className="mt-1 block w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm"
+              />
+            </div>
+          </div>
 
-                {/* Name + role */}
-                <div className="mt-4">
-                  <p className="text-base font-semibold text-gray-900">{fullName}</p>
-                  <p className="text-sm text-gray-500">Administrator</p>
-                </div>
-
-                {/* Account Active switch (replaces stats & side menu) */}
-                <div className="mt-6 w-full">
-                  <div className="flex items-center justify-between rounded-xl border border-gray-300 bg-white px-4 py-3">
-                    <span className="text-sm font-medium text-gray-700">Account Active</span>
-                    <Switch checked={accountActive} onChange={setAccountActive} />
-                  </div>
-                  <p className="mt-2 text-left text-xs text-gray-500">
-                    Toggle to deactivate or reactivate the account.
-                  </p>
-                </div>
-
-                {/* Upload button only when file selected */}
-                {selectedFile && (
-                  <button
-                    onClick={handleUploadToServer}
-                    className="mt-4 w-full rounded-xl bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
-                  >
-                    Upload to Server
-                  </button>
-                )}
+          {/* Main form */}
+          <div className="lg:col-span-8 xl:col-span-9">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">fullName</label>
+                <input value={fullName} onChange={(e)=>setFullName(e.target.value)} className="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">email</label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e)=>setEmail(e.target.value)}
+                  disabled={lockEmail}
+                  className="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm disabled:bg-gray-50 disabled:text-gray-500"
+                />
+                {lockEmail && <p className="mt-1 text-xs text-red-600">{emailHelp}</p>}
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">joviEmail</label>
+                <input
+                  type="email"
+                  value={joviEmail}
+                  onChange={(e)=>setJoviEmail(e.target.value)}
+                  disabled={lockJoviEmail}
+                  className="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm disabled:bg-gray-50 disabled:text-gray-500"
+                />
+                {lockJoviEmail && <p className="mt-1 text-xs text-red-600">{emailHelp}</p>}
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">mlsId</label>
+                <input value={mlsId} readOnly className="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm bg-gray-50 text-gray-500" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">licenseNumber</label>
+                <input value={licenseNumber} readOnly className="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm bg-gray-50 text-gray-500" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">licensedAs</label>
+                <input value={licensedAs} onChange={(e)=>setLicensedAs(e.target.value)} className="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">licensedFor</label>
+                <input value={licensedFor} onChange={(e)=>setLicensedFor(e.target.value)} className="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm" />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="mb-1 block text-sm font-medium text-gray-700">personalRealEstateCorporationName</label>
+                <input value={personalRealEstateCorporationName} onChange={(e)=>setPrecName(e.target.value)} className="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">knownAs</label>
+                <input value={knownAs} onChange={(e)=>setKnownAs(e.target.value)} className="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">phoneNumber</label>
+                <input value={phoneNumber} onChange={(e)=>setPhoneNumber(e.target.value)} className="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm" />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700">teamName</label>
+                <input value={teamName} onChange={(e)=>setTeamName(e.target.value)} className="block w-full rounded-xl border border-gray-300 px-3 py-2.5 text-sm" />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="mb-1 block text-sm font-medium text-gray-700">aboutUs</label>
+                <textarea value={aboutUs} onChange={(e)=>setAboutUs(e.target.value)} className="block min-h-[110px] w-full rounded-2xl border border-gray-300 p-3 text-sm" />
               </div>
             </div>
-          </aside>
 
-          {/* RIGHT: Form with borders on all inputs */}
-          <section className="lg:col-span-8 xl:col-span-9">
-            <form onSubmit={onSubmit}>
-              <h2 className="mb-6 text-lg font-semibold text-gray-900">Personal Information</h2>
-
-              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                {/* Full Name */}
-                <div className="sm:col-span-1">
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Full Name</label>
-                  <div className="flex rounded-xl border border-gray-300 focus-within:ring-2 focus-within:ring-blue-500">
-                    <span className="inline-flex items-center rounded-l-xl bg-gray-50 px-3 text-gray-500">
-                      <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor"><path d="M10 8a3 3 0 100-6 3 3 0 000 6zm-5 6a5 5 0 0110 0H5z"/></svg>
-                    </span>
-                    <input
-                      type="text"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
-                      className="block w-full rounded-r-xl border-0 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none"
-                    />
-                  </div>
-                  {errors.fullName && <p className="mt-1 text-xs text-red-600">{errors.fullName}</p>}
+            {/* Readonly group */}
+            <div className="mt-7 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {readOnlyFields.map((f) => (
+                <div key={f.label}>
+                  <label className="mb-1 block text-sm font-medium text-gray-700">{f.label}</label>
+                  <input value={f.value} readOnly className="block w-full cursor-not-allowed rounded-xl border border-gray-200 bg-gray-50 px-3 py-2.5 text-sm text-gray-700" />
                 </div>
+              ))}
+            </div>
 
-                {/* License Number */}
-                <div className="sm:col-span-1">
-                  <label className="mb-1 block text-sm font-medium text-gray-700">License Number</label>
-                  <input
-                    type="text"
-                    value={record.licenseNumber}
-                    disabled
-                    className="block w-full rounded-xl border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-gray-700"
-                  />
-                </div>
-
-                {/* Email */}
-                <div className="sm:col-span-1">
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Email Address</label>
-                  <div className="flex rounded-xl border border-gray-300 focus-within:ring-2 focus-within:ring-blue-500">
-                    <span className="inline-flex items-center rounded-l-xl bg-gray-50 px-3 text-gray-500">@</span>
-                    <input
-                      type="email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="block w-full rounded-r-xl border-0 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none"
-                    />
-                  </div>
-                  {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
-                </div>
-
-                {/* Phone */}
-                <div className="sm:col-span-1">
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Phone Number</label>
-                  <div className="flex rounded-xl border border-gray-300 focus-within:ring-2 focus-within:ring-blue-500">
-                    <span className="inline-flex items-center rounded-l-xl bg-gray-50 px-3 text-gray-500">
-                      <svg viewBox="0 0 20 20" className="h-5 w-5" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
-                    </span>
-                    <input
-                      type="tel"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                      className="block w-full rounded-r-xl border-0 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none"
-                      title="10-digit number (e.g., 6041234567)"
-                    />
-                  </div>
-                  {errors.phoneNumber && <p className="mt-1 text-xs text-red-600">{errors.phoneNumber}</p>}
-                </div>
-
-                {/* PREC */}
-                <div className="sm:col-span-1">
-                  <label className="mb-1 block text-sm font-medium text-gray-700">Personal Real Estate Corporation Name</label>
-                  <select
-                    value={personalRealEstateCorporationName}
-                    onChange={(e) => setPersonalRealEstateCorporationName(e.target.value)}
-                    className="block w-full rounded-xl border border-gray-300 bg-white px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="Jovi Realty Corp">Jovi Realty Corp</option>
-                    <option value="Vancouver Properties Inc">Vancouver Properties Inc</option>
-                    <option value="Pacific Real Estate Group">Pacific Real Estate Group</option>
-                    <option value="Metro Homes Ltd">Metro Homes Ltd</option>
-                    <option value="Coastal Estates LLC">Coastal Estates LLC</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* About */}
-              <div className="mt-7">
-                <label className="mb-1 block text-sm font-medium text-gray-700">About Us (Bio)</label>
-                <div className="overflow-hidden rounded-2xl border border-gray-300">
-                  <textarea
-                    value={aboutUs}
-                    onChange={(e) => setAboutUs(e.target.value)}
-                    className="min-h-[110px] w-full resize-y border-0 bg-white p-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none"
-                    placeholder="Write a short introduction"
-                  />
-                </div>
-              </div>
-
-              {/* Footer buttons */}
-              <div className="mt-8 flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => navigate(`/admin/administrators?page=${page}`)}
-                  className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-blue-700 shadow-sm ring-1 ring-blue-600/20 transition hover:bg-blue-50"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-500 disabled:opacity-50"
-                >
-                  {saving ? "Saving..." : "Save"}
-                </button>
-              </div>
-            </form>
-          </section>
+            <div className="mt-8 flex items-center justify-end gap-3">
+              <Link to={`/admin/administrators/${agentListId}/show?page=${page}`} className="rounded-xl border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50">Show</Link>
+              <button type="button" onClick={() => navigate(`/admin/administrators?page=${page}`)} className="rounded-xl bg-white px-4 py-2 text-sm font-medium text-blue-700 shadow-sm ring-1 ring-blue-600/20 transition hover:bg-blue-50">Cancel</button>
+              <button type="submit" disabled={saving} className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{saving ? "Saving…" : "Save"}</button>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <DeleteConfirm
-        open={confirmOpen}
-        onCancel={() => setConfirmOpen(false)}
-        onConfirm={() => {
-          setConfirmOpen(false);
-          alert("Administrator deleted (demo). Hook API call here.");
-          navigate(`/admin/administrators?page=${page}`);
-        }}
-      />
+      </form>
     </div>
   );
 }
