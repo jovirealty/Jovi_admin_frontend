@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "./useAuth";
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
@@ -30,14 +29,11 @@ export function useStaffAccounts({ q = "", page = 1, limit = 25 } = {}) {
           headers: { ...localAuthHeader(), "Content-Type": "application/json" },
           credentials: "include",
         });
-
         if (!res.ok) {
           const text = await res.text().catch(() => "");
           throw new Error(text || `HTTP ${res.status}`);
         }
-
         const data = await res.json();
-        // data: { accounts, page, limit, total, pages }
         if (!abort) {
           setAccounts(Array.isArray(data?.accounts) ? data.accounts : []);
           setMeta({
@@ -62,7 +58,6 @@ export function useStaffAccounts({ q = "", page = 1, limit = 25 } = {}) {
   return { accounts, loading, error, ...meta };
 }
 
-// ---------------- Create a staff account (POST) ----------------
 export async function createStaffAccount(payload) {
   const res = await fetch(`${API_BASE}/auth/staff/accounts/signup`, {
     method: "POST",
@@ -77,20 +72,15 @@ export async function createStaffAccount(payload) {
   return res.json();
 }
 
-// ---------------- Get one staff account (GET) ----------------
 export async function getStaffAccount(accountId) {
   const res = await fetch(`${API_BASE}/auth/staff/accounts/${accountId}`, {
-    headers: { 
-      ...localAuthHeader(), 
-      "Content-Type": "application/json",
-    },
+    headers: { ...localAuthHeader(), "Content-Type": "application/json" },
     credentials: "include",
   });
   if (!res.ok) throw new Error(`Not found (${res.status})`);
   return res.json();
 }
 
-// ---------- agent lookup by email (email OR joviEmail) ----------
 export async function lookupAgentByEmail(email) {
   const res = await fetch(
     `${API_BASE}/auth/staff/agent-lookup?email=${encodeURIComponent(email)}`,
@@ -102,10 +92,29 @@ export async function lookupAgentByEmail(email) {
   if (res.status === 404) return null;
   if (!res.ok) {
     let msg = "Lookup failed";
-    try {
-      msg = (await res.json()).error || msg;
-    } catch {}
+    try { msg = (await res.json()).error || msg; } catch {}
     throw new Error(msg);
   }
-  return res.json(); // { id, fullName, email, joviEmail }
+  return res.json();
+}
+
+// Update agentLists (+ sync staff name). Accepts optional `file` for avatar upload.
+export async function updateAgentAndStaffProfile(accountId, payload = {}, file) {
+  const form = new FormData();
+  Object.entries(payload).forEach(([k, v]) => {
+    if (v !== undefined && v !== null) form.append(k, v);
+  });
+  if (file) form.append("photo", file);
+
+  const res = await fetch(`${API_BASE}/auth/staff/accounts/${accountId}/profile`, {
+    method: "PUT",
+    headers: { ...localAuthHeader() }, // no Content-Type for FormData
+    credentials: "include",
+    body: form,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || "Failed to update profile");
+  }
+  return res.json();
 }
