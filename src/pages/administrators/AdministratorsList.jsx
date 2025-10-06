@@ -45,12 +45,12 @@ function RowMenu({ onShow, onEdit, onDelete, onClose }) {
         </svg>
         Edit
       </button>
-      <button onClick={onDelete} className="flex w-full items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50">
+      {/* <button onClick={onDelete} className="flex w-full items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50">
         <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" />
         </svg>
         Delete
-      </button>
+      </button> */}
     </div>
   );
 }
@@ -261,7 +261,7 @@ export default function AdministratorsList() {
                             setOpenMenuId(null);
                             goEdit(row.id);
                           }}
-                          onDelete={() => handleDelete(row.id)}
+                          // onDelete={() => handleDelete(row.id)}
                           onClose={() => setOpenMenuId(null)}
                         />
                       )}
