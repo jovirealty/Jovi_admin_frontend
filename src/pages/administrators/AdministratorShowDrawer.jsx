@@ -9,25 +9,25 @@ const Pill = ({ value }) => (
   </span>
 );
 
-function DeleteConfirm({ open, onCancel, onConfirm }) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40">
-      <div className="w-[520px] rounded-xl border border-gray-200 bg-white p-5 shadow-xl">
-        <div className="mb-4 text-sm font-semibold text-gray-700">Confirm</div>
-        <div className="mb-6 text-sm text-gray-700">Do you really want to remove this item?</div>
-        <div className="flex items-center justify-end gap-3">
-          <button onClick={onCancel} className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50">
-            Cancel
-          </button>
-          <button onClick={onConfirm} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500">
-            Confirm
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+// function DeleteConfirm({ open, onCancel, onConfirm }) {
+//   if (!open) return null;
+//   return (
+//     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/40">
+//       <div className="w-[520px] rounded-xl border border-gray-200 bg-white p-5 shadow-xl">
+//         <div className="mb-4 text-sm font-semibold text-gray-700">Confirm</div>
+//         <div className="mb-6 text-sm text-gray-700">Do you really want to remove this item?</div>
+//         <div className="flex items-center justify-end gap-3">
+//           <button onClick={onCancel} className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50">
+//             Cancel
+//           </button>
+//           <button onClick={onConfirm} className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500">
+//             Confirm
+//           </button>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
 export default function AdministratorShowDrawer() {
   const { id } = useParams();
@@ -36,7 +36,7 @@ export default function AdministratorShowDrawer() {
   const page = searchParams.get("page") || "1";
   const navigate = useNavigate();
 
-  const [confirmOpen, setConfirmOpen] = useState(false);
+  // const [confirmOpen, setConfirmOpen] = useState(false);
   const [admin, setAdmin] = useState(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState("");
@@ -98,9 +98,9 @@ export default function AdministratorShowDrawer() {
                 >
                   Edit
                 </Link>
-                <button onClick={() => setConfirmOpen(true)} className="rounded-lg border border-red-600 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50">
+                {/* <button onClick={() => setConfirmOpen(true)} className="rounded-lg border border-red-600 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50">
                   Delete
-                </button>
+                </button> */}
               </div>
             </div>
 
@@ -187,7 +187,7 @@ export default function AdministratorShowDrawer() {
         )}
       </aside>
 
-      <DeleteConfirm
+      {/* <DeleteConfirm
         open={confirmOpen}
         onCancel={() => setConfirmOpen(false)}
         onConfirm={() => {
@@ -195,7 +195,7 @@ export default function AdministratorShowDrawer() {
           alert("Deleted (demo). Hook API call here.");
           navigate(`/admin/administrators?page=${page}`);
         }}
-      />
+      /> */}
     </>
   );
 }
