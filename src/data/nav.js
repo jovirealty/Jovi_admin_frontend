@@ -2,6 +2,7 @@ export const NAV = {
   superadmin: [
     { to: '/admin/dashboard', icon: 'home', label: 'Dashboard' },
     { to: '/admin/administrators', icon: 'users', label: 'Administrators' },
+    { to: '/admin/property', icon: 'property', label: 'Property' },
     { to: '/admin/customers', icon: 'user-round', label: 'Customers' },
     { label: 'Matrix', icon: 'layers', children: [
         { to: '/admin/matrix/users', label: 'Matrix Users' },

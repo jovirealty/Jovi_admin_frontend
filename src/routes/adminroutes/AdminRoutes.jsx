@@ -4,6 +4,7 @@ import DashboardLayout from "../../layouts/DashboardLayout";
 import Dashboard from "../../pages/Dashboard";
 import NotFound from "../../pages/NotFound";
 import Placeholder from "../../pages/Placeholder";
+import PropertyList from "../../pages/properties/PropertyList";
 
 // Pages
 import AdministratorsList from "../../pages/administrators/AdministratorsList";
@@ -30,6 +31,7 @@ const adminRoutes = {
                 { path: 'administrators/new', element: <CreateAdministrator /> },
 
                 // Your other areas (stubs for now)
+                { path: 'property', element: <PropertyList /> },
                 { path: 'customers', element: <Placeholder title="Customers" /> },
                 { path: 'categories', element: <Placeholder title="Categories" /> },
                 { path: 'products', element: <Placeholder title="Products" /> },
