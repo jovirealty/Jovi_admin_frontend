@@ -52,14 +52,6 @@ function RowMenu({ onShow, onEdit, onClose }) {
         </svg>
         Edit
       </button>
-      {/* Optional Delete (kept commented to mirror Admins file)
-      <button onClick={onDelete} className="flex w-full items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40">
-        <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14" />
-        </svg>
-        Delete
-      </button>
-      */}
     </div>
   );
 }
@@ -69,7 +61,7 @@ export default function PropertyList() {
   const initialPage = Number(searchParams.get("page") || 1);
   const [page, setPage] = useState(initialPage);
   const [query, setQuery] = useState("");
-  const [openMenuId, setOpenMenuId] = useState(null); // NEW: track which row's menu is open
+  const [openMenuId, setOpenMenuId] = useState(null);
   const navigate = useNavigate();
 
   const pageSize = 6; // client-side pagination for dummy data
@@ -132,7 +124,7 @@ export default function PropertyList() {
           </button>
 
           <Link
-            to="/admin/property/new"
+            to="/admin/property/add-property"
             className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400"
           >
             <svg viewBox="0 0 24 24" className="size-4" fill="currentColor">

@@ -1,12 +1,14 @@
 import { Navigate } from "react-router-dom";
 import ProtectedRoute from "../ProtectedRoute";
+
+// Pages
 import DashboardLayout from "../../layouts/DashboardLayout";
 import Dashboard from "../../pages/Dashboard";
 import NotFound from "../../pages/NotFound";
 import Placeholder from "../../pages/Placeholder";
 import PropertyList from "../../pages/properties/PropertyList";
+import AddProperty from "../../pages/properties/AddProperty";
 
-// Pages
 import AdministratorsList from "../../pages/administrators/AdministratorsList";
 import CreateAdministrator from "../../pages/administrators/CreateAdministrator";
 import EditAdministrator from "../../pages/administrators/EditAdministrator";
@@ -20,18 +22,23 @@ const adminRoutes = {
             element: <DashboardLayout />, 
             children: [
                 { index: true, element: <Navigate to="dashboard" replace /> },
-                { path: "dashboard", element: <Dashboard /> },
-                // Superadmin management screens
+                { path: "dashboard", element: <Dashboard /> }, // Dashboard screens
+                // Adminstrator routes
                 {
                     path: 'administrators',
                     element: <AdministratorsList />,
-                    children: [{ path: ':id/show', element: <AdministratorShowDrawer /> }],
+                    children: [
+                        { path: ':id/show', element: <AdministratorShowDrawer /> },
+                    ],
                 },
                 { path: 'administrators/:id/edit', element: <EditAdministrator /> },
-                { path: 'administrators/new', element: <CreateAdministrator /> },
+                { path: 'administrators/newadministrators', element: <CreateAdministrator /> },
+                // Adminstrator routes-----------------ends
 
-                // Your other areas (stubs for now)
+                // Property listing routes
                 { path: 'property', element: <PropertyList /> },
+                { path: 'property/add-property', element: <AddProperty />},
+                // Your other areas (stubs for now)
                 { path: 'customers', element: <Placeholder title="Customers" /> },
                 { path: 'categories', element: <Placeholder title="Categories" /> },
                 { path: 'products', element: <Placeholder title="Products" /> },
