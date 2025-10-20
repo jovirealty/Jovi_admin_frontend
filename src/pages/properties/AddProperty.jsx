@@ -1,16 +1,24 @@
-import { useState } from "react";
+// src/pages/admin/AddProperty.jsx
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from 'react-router-dom';
 import SectionCard from "../../components/form/SectionCard";
 import ImageUploader from "../../components/form/ImageUploader";
+import AgentGate from "../../components/form/AgentGate";
+import ListingTypeTabs from "../../components/form/ListingTypeTabs";
+import useStaffPropertyLookup from "../../hooks/addproperty/admin/useStaffPropertyLookup";
 import {
-  PROPERTY_TYPES,
-  TENURE_TYPES,
   HEATING_TYPES,
   COOLING_TYPES,
   PARKING_TYPES,
-  HOA_AMENITIES,
   VIEW_TYPES,
 } from "../../data/propertyFormOptions";
+import {
+  SALE_PROPERTY_TYPES,
+  RENT_PROPERTY_TYPES,
+  PROPERTY_SUBTYPES,
+} from "../../data/listingOptions";
 
+// ---------- small primitives ----------
 const Field = ({ label, required, hint, children }) => (
   <label className="block">
     <div className="mb-1.5 text-sm font-medium text-neutral-800 dark:text-neutral-200">
@@ -18,7 +26,9 @@ const Field = ({ label, required, hint, children }) => (
     </div>
     {children}
     {hint && (
-      <p className="mt-1.5 text-xs text-neutral-500 dark:text-neutral-400">{hint}</p>
+      <p className="mt-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+        {hint}
+      </p>
     )}
   </label>
 );
@@ -28,574 +38,608 @@ const inputBase =
 const selectBase = inputBase;
 const textareaBase = `${inputBase} min-h-28`;
 
-export default function AddProperty() {
-  // minimal form state; wire to backend as needed
-  const [form, setForm] = useState({
-    // property info
-    title: "",
-    priceMin: "",
-    priceMax: "",
-    currency: "USD",
-    type: "",
-    tenure: "",
-    beds: "",
-    baths: "",
-    sqft: "",
-    yearBuilt: "",
-    units: "",
-    // location
-    address: "",
-    street: "",
-    streetNo: "",
-    area: "",
-    city: "",
-    province: "",
-    postalCode: "",
-    country: "Canada",
-    gmap: "",
-    // interior
-    heating: "",
-    cooling: "",
-    flooring: "",
-    appliances: "",
-    // exterior
-    lotSize: "",
-    parking: "",
-    view: "",
-    exteriorFeatures: "",
-    // building & community
-    hoa: "",
-    hoaAmenities: [],
-    // financial
-    taxes: "",
-    taxYear: "",
-    rent: "",
-    // legal & additional
-    mls: "",
-    legalDesc: "",
-    disclosures: "",
-    remarks: "",
+// ---------- mock API (replace) ----------
+async function fetchAgentByEmailOrName(q) {
+  if (!q) return null;
+  return { id: "agent_123", name: "Rebecca Chen", email: "rebecca.chen@demo.com" };
+}
+
+// ---------- Validation helpers ----------
+const today = () => new Date().toISOString().slice(0, 10);
+
+const REQUIRED_SALE = {
+  // Property Information
+  status: true,
+  listPrice: true,
+  type: true,
+  subtype: true,
+  description: true,
+  listingDate: true, // auto-filled, but still required
+  // Location
+  stateProvince: true,
+  city: true,
+  postalCode: true,
+  // Interior
+  bedrooms: true,
+  totalBath: true,
+};
+
+const REQUIRED_RENT = {
+  // header prompt
+  isPrivateRoom: true,
+  // Property Information
+  status: true,
+  rentPrice: true,
+  type: true,
+  subtype: true,
+  description: true,
+  // Location
+  stateProvince: true,
+  city: true,
+  postalCode: true,
+  // Interior
+  bedrooms: true,
+  totalBath: true,
+};
+
+function validate(form, mode) {
+  const req = mode === "sale" ? REQUIRED_SALE : REQUIRED_RENT;
+  const errors = {};
+
+  const need = (key, fn) => {
+    const v = form[key];
+    const ok = fn ? fn(v) : !!String(v ?? "").trim();
+    if (!ok) errors[key] = "This field is required.";
+  };
+
+  Object.keys(req).forEach((k) => {
+    if (!req[k]) return;
+    // numeric fields: require positive number
+    if (["listPrice", "rentPrice", "bedrooms", "totalBath"].includes(k)) {
+      need(k, (v) => v !== "" && !isNaN(Number(v)) && Number(v) >= 0);
+    } else {
+      need(k);
+    }
   });
 
-  const [images, setImages] = useState([]); // {id, file, url}
-  const [submitting, setSubmitting] = useState(false);
+  return errors;
+}
+
+// ---------- Shared sections ----------
+function LocationSection({ form, onChange, required }) {
+  return (
+    <SectionCard title="Location Information">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Unit Number">
+            <input className={inputBase} value={form.unitNumber || ""} onChange={onChange("unitNumber")} />
+          </Field>
+          <Field label="Street Number">
+            <input className={inputBase} value={form.streetNumber || ""} onChange={onChange("streetNumber")} />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Street Name">
+            <input className={inputBase} value={form.streetName || ""} onChange={onChange("streetName")} />
+          </Field>
+          <Field label="Street Suffix">
+            <input className={inputBase} value={form.streetSuffix || ""} onChange={onChange("streetSuffix")} />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          <Field label="State/Province" required={required.stateProvince}>
+            <input className={inputBase} value={form.stateProvince || ""} onChange={onChange("stateProvince")} />
+          </Field>
+          <Field label="City" required={required.city}>
+            <input className={inputBase} value={form.city || ""} onChange={onChange("city")} />
+          </Field>
+          <Field label="Postal Code" required={required.postalCode}>
+            <input className={inputBase} value={form.postalCode || ""} onChange={onChange("postalCode")} />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          <Field label="Latitude">
+            <input className={inputBase} value={form.latitude || ""} onChange={onChange("latitude")} />
+          </Field>
+          <Field label="Longitude">
+            <input className={inputBase} value={form.longitude || ""} onChange={onChange("longitude")} />
+          </Field>
+          <Field label="Subdivision">
+            <input className={inputBase} value={form.subdivision || ""} onChange={onChange("subdivision")} />
+          </Field>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+
+function InteriorSection({ form, onChange, required }) {
+  return (
+    <SectionCard title="Interior Information">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="grid grid-cols-3 gap-3">
+          <Field label="Bedrooms" required={required.bedrooms}>
+            <input className={inputBase} type="number" min={0} value={form.bedrooms ?? ""} onChange={onChange("bedrooms")} />
+          </Field>
+          <Field label="Total Bath" required={required.totalBath}>
+            <input className={inputBase} type="number" min={0} value={form.totalBath ?? ""} onChange={onChange("totalBath")} />
+          </Field>
+          <Field label="Half Bath">
+            <input className={inputBase} type="number" min={0} value={form.halfBath ?? ""} onChange={onChange("halfBath")} />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Living Area (sqft)">
+            <input className={inputBase} type="number" min={0} value={form.livingArea ?? ""} onChange={onChange("livingArea")} />
+          </Field>
+          <Field label="Floor Area (sqft)">
+            <input className={inputBase} type="number" min={0} value={form.floorArea ?? ""} onChange={onChange("floorArea")} />
+          </Field>
+        </div>
+
+        <Field label="Interior Features">
+          <input className={inputBase} placeholder="e.g., Vaulted ceiling, Walk-in closet" value={form.interiorFeatures || ""} onChange={onChange("interiorFeatures")} />
+        </Field>
+
+        <div className="grid grid-cols-3 gap-3">
+          <Field label="Heating System">
+            <select className={selectBase} value={form.heatingSystem || ""} onChange={onChange("heatingSystem")}>
+              <option value="">Select heating</option>
+              {HEATING_TYPES.map((t) => (
+                <option key={t}>{t}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Total Fireplace">
+            <input className={inputBase} type="number" min={0} value={form.totalFireplace ?? ""} onChange={onChange("totalFireplace")} />
+          </Field>
+          <Field label="Laundry Feature">
+            <input className={inputBase} value={form.laundryFeature || ""} onChange={onChange("laundryFeature")} />
+          </Field>
+        </div>
+
+        <Field label="Fireplace Feature">
+          <input className={inputBase} value={form.fireplaceFeature || ""} onChange={onChange("fireplaceFeature")} />
+        </Field>
+
+        <Field label="Appliances">
+          <input className={inputBase} placeholder="Fridge, Stove, Dishwasher" value={form.appliances || ""} onChange={onChange("appliances")} />
+        </Field>
+      </div>
+    </SectionCard>
+  );
+}
+
+function ExteriorSection({ form, onChange }) {
+  return (
+    <SectionCard title="Exterior Information">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Field label="Parking">
+          <select className={selectBase} value={form.parking || ""} onChange={onChange("parking")}>
+            <option value="">Select parking</option>
+            {PARKING_TYPES.map((t) => (
+              <option key={t}>{t}</option>
+            ))}
+          </select>
+        </Field>
+
+        <div className="grid grid-cols-3 gap-3">
+          <Field label="Lot Size (acre)">
+            <input className={inputBase} value={form.lotAcre || ""} onChange={onChange("lotAcre")} />
+          </Field>
+          <Field label="Lot Size (sqft)">
+            <input className={inputBase} value={form.lotSqft || ""} onChange={onChange("lotSqft")} />
+          </Field>
+          <Field label="Lot Dimensions">
+            <input className={inputBase} value={form.lotDim || ""} onChange={onChange("lotDim")} />
+          </Field>
+        </div>
+
+        <Field label="Lot Features">
+          <input className={inputBase} value={form.lotFeatures || ""} onChange={onChange("lotFeatures")} />
+        </Field>
+
+        <div className="grid grid-cols-3 gap-3">
+          <Field label="Open Parking">
+            <input className={inputBase} type="number" min={0} value={form.openParking ?? ""} onChange={onChange("openParking")} />
+          </Field>
+          <Field label="Total Parking">
+            <input className={inputBase} type="number" min={0} value={form.totalParking ?? ""} onChange={onChange("totalParking")} />
+          </Field>
+          <Field label="Parking Features">
+            <input className={inputBase} value={form.parkingFeatures || ""} onChange={onChange("parkingFeatures")} />
+          </Field>
+        </div>
+
+        <div className="grid grid-cols-3 gap-3">
+          <Field label="Has View">
+            <select className={selectBase} value={form.hasView || ""} onChange={onChange("hasView")}>
+              <option value="">Select</option>
+              <option>Yes</option>
+              <option>No</option>
+            </select>
+          </Field>
+          <Field label="View Description">
+            <select className={selectBase} value={form.viewDescription || ""} onChange={onChange("viewDescription")}>
+              <option value="">Select view</option>
+              {VIEW_TYPES.map((t) => (
+                <option key={t}>{t}</option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Exterior Features">
+            <input className={inputBase} value={form.exteriorFeatures || ""} onChange={onChange("exteriorFeatures")} />
+          </Field>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+
+function BuildingCommunitySection({ form, onChange }) {
+  return (
+    <SectionCard title="Building & Community Information">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Field label="Strata / HOA (monthly)">
+          <input className={inputBase} type="number" min={0} value={form.strata ?? ""} onChange={onChange("strata")} />
+        </Field>
+        <Field label="Amenities">
+          <input className={inputBase} placeholder="Gym, Pool, Sauna…" value={form.amenities || ""} onChange={onChange("amenities")} />
+        </Field>
+        <Field label="Pet Policy">
+          <input className={inputBase} placeholder="Pets allowed / size limits" value={form.petPolicy || ""} onChange={onChange("petPolicy")} />
+        </Field>
+      </div>
+    </SectionCard>
+  );
+}
+
+// ---------- sale / rent specific ----------
+function PropertyInfoSale({ form, onChange, required }) {
+  return (
+    <SectionCard title="Property Information (Sale)">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Field label="Property Status" required={required.status}>
+          <select className={selectBase} value={form.status || ""} onChange={onChange("status")}>
+            {["Active", "Inactive", "Hold", "Deactivated", "Coming soon"].map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="Sale Listing ID" hint="Generated server-side on save">
+          <input className={inputBase} value={form.saleListingId || ""} onChange={onChange("saleListingId")} disabled />
+        </Field>
+
+        <Field label="List Price (CAD)" required={required.listPrice}>
+          <input className={inputBase} type="number" min={0} value={form.listPrice ?? ""} onChange={onChange("listPrice")} />
+        </Field>
+
+        <Field label="Currency">
+          <select className={selectBase} value={form.currency || "CAD"} onChange={onChange("currency")}>
+            <option>CAD</option>
+            <option>USD</option>
+          </select>
+        </Field>
+
+        <Field label="Property Type" required={required.type}>
+          <select className={selectBase} value={form.type || ""} onChange={onChange("type")}>
+            <option value="">Select type</option>
+            {SALE_PROPERTY_TYPES.map((t) => (
+              <option key={t}>{t}</option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="Property Subtype" required={required.subtype}>
+          <select className={selectBase} value={form.subtype || ""} onChange={onChange("subtype")}>
+            <option value="">Select subtype</option>
+            {PROPERTY_SUBTYPES.map((t) => (
+              <option key={t}>{t}</option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="Listing Date" required={required.listingDate}>
+          <input className={inputBase} type="date" value={form.listingDate || ""} onChange={onChange("listingDate")} />
+        </Field>
+
+        <Field label="Year Built">
+          <input className={inputBase} type="number" min={1700} max={new Date().getFullYear()} value={form.yearBuilt ?? ""} onChange={onChange("yearBuilt")} />
+        </Field>
+
+        <div className="md:col-span-2">
+          <Field label="Property Description" required={required.description}>
+            <textarea className={textareaBase} value={form.description || ""} onChange={onChange("description")} />
+          </Field>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+
+function FinancialSale({ form, onChange }) {
+  return (
+    <SectionCard title="Financial Information">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <Field label="Tax Year">
+          <input className={inputBase} type="number" min={1990} max={new Date().getFullYear()} value={form.taxYear ?? ""} onChange={onChange("taxYear")} />
+        </Field>
+        <Field label="Annual Tax Amount">
+          <input className={inputBase} type="number" min={0} value={form.taxAmount ?? ""} onChange={onChange("taxAmount")} />
+        </Field>
+        <Field label="Price per Square Foot">
+          <input className={inputBase} type="number" min={0} value={form.pricePerSqft ?? ""} onChange={onChange("pricePerSqft")} />
+        </Field>
+      </div>
+    </SectionCard>
+  );
+}
+
+function PropertyInfoRent({ form, onChange, required }) {
+  return (
+    <SectionCard title="Property Information (Rent)">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Field label="Property Status" required={required.status}>
+          <select className={selectBase} value={form.status || ""} onChange={onChange("status")}>
+            {["Active", "Inactive", "Hold", "Deactivated", "Coming soon"].map((s) => (
+              <option key={s}>{s}</option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="This is a private room in a shared property" required={required.isPrivateRoom}>
+          <select className={selectBase} value={form.isPrivateRoom ?? ""} onChange={onChange("isPrivateRoom")}>
+            <option value="">Select</option>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </Field>
+
+        <Field label="Price per month (CAD)" required={required.rentPrice}>
+          <input className={inputBase} type="number" min={0} value={form.rentPrice ?? ""} onChange={onChange("rentPrice")} />
+        </Field>
+
+        <Field label="Rent Listing ID" hint="Generated server-side on save">
+          <input className={inputBase} value={form.rentListingId || ""} onChange={onChange("rentListingId")} disabled />
+        </Field>
+
+        <Field label="Property Type" required={required.type}>
+          <select className={selectBase} value={form.type || ""} onChange={onChange("type")}>
+            <option value="">Select type</option>
+            {RENT_PROPERTY_TYPES.map((t) => (
+              <option key={t}>{t}</option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="Property Subtype" required={required.subtype}>
+          <select className={selectBase} value={form.subtype || ""} onChange={onChange("subtype")}>
+            <option value="">Select subtype</option>
+            {PROPERTY_SUBTYPES.map((t) => (
+              <option key={t}>{t}</option>
+            ))}
+          </select>
+        </Field>
+
+        <Field label="Listing Date">
+          <input className={inputBase} type="date" value={form.listingDate || ""} onChange={onChange("listingDate")} />
+        </Field>
+
+        <div className="md:col-span-2">
+          <Field label="Property Description" required={required.description}>
+            <textarea className={textareaBase} value={form.description || ""} onChange={onChange("description")} />
+          </Field>
+        </div>
+      </div>
+    </SectionCard>
+  );
+}
+
+// ---------- page ----------
+export default function AddProperty() {
+  const [agent, setAgent] = useState(null);
+  const [mode, setMode] = useState("sale"); // "sale" | "rent"
+  const [images, setImages] = useState([]);
+  const [form, setForm] = useState({
+    currency: "CAD",
+    listingDate: today(), // auto-fill
+  });
+  const [errors, setErrors] = useState({});
+  const errorRef = useRef(null);
+
+  const { lookupStaff, loading: lookupLoading, error: lookupError, setError: setLookupError } = useStaffPropertyLookup();
+
+  // keep listingDate auto-set if empty
+  useEffect(() => {
+    if (!form.listingDate) {
+      setForm((s) => ({ ...s, listingDate: today() }));
+    }
+  }, [form.listingDate]);
 
   const onChange = (key) => (e) =>
-    setForm((s) => ({ ...s, [key]: e.target.value }));
+    setForm((s) => ({ ...s, [key]: e?.target?.value ?? e }));
 
-  const toggleAmenity = (value) =>
-    setForm((s) => {
-      const has = s.hoaAmenities.includes(value);
-      return {
-        ...s,
-        hoaAmenities: has
-          ? s.hoaAmenities.filter((v) => v !== value)
-          : [...s.hoaAmenities, value],
-      };
-    });
+  const submitPayload = useMemo(() => ({
+    ...form,
+    propertyFor: mode,       // REQUIRED for backend save
+    agentId: agent?.id,
+    images,
+  }),[form, agent, mode, images]);
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    setSubmitting(true);
-    try {
-      // TODO: integrate API call
-      // payload idea:
-      // const payload = { ...form, images }; // images => upload first, send URLs
-      // await api.createProperty(payload)
-      alert("Property saved (demo). Wire this to your API.");
-    } finally {
-      setSubmitting(false);
+    if (!agent) return;
+
+    // propertyFor must be present
+    if (!mode) {
+      setErrors({ propertyFor: "[Proeprty field sale/rent] - This field is required.", ...errors });
+      return;
     }
+    const v = validate(form, mode);
+    setErrors(v);
+
+    if (Object.keys(v).length) {
+      // scroll to error summary
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+
+    // ✅ All good: dump full object to console
+    // (hook your upload + POST here)
+    // eslint-disable-next-line no-console
+    console.log("LISTING_PAYLOAD", submitPayload);
+    alert("Valid! Check console for the full payload.");
   };
+
+  const requiredMap = mode === "sale" ? REQUIRED_SALE : REQUIRED_RENT;
 
   return (
     <form onSubmit={onSubmit} className="p-6">
-      {/* Breadcrumb */}
-      <div className="mb-6 text-sm text-neutral-500 dark:text-neutral-400">
-        <span className="hover:underline cursor-pointer">Dashboard</span> /{" "}
+    {/* Breadcrumb */}
+    <div className="mb-6 text-sm text-neutral-500 dark:text-neutral-400">
+      <Link to="/admin/dashboard" className="hover:underline">Dashboard</Link> /{" "}
+      <Link to="/admin/property" className="hover:underline">Property</Link> /{" "}
         <span className="text-neutral-700 dark:text-neutral-200">Add property</span>
-      </div>
+    </div>
 
-      {/* Page header */}
+      {/* Header */}
       <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
-            Add property
+            Add Property Listing
           </h1>
           <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
-            Provide complete details. Fields marked * are required.
+            Fields marked <span className="text-red-600">*</span> are required.
           </p>
         </div>
-        <div className="flex gap-2">
-          <button
-            type="button"
-            className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800/60"
-            onClick={() => window.history.back()}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={submitting}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60 dark:bg-blue-500 dark:hover:bg-blue-400"
-          >
-            {submitting ? "Saving…" : "Save property"}
-          </button>
-        </div>
+        {agent && (
+          <div className="text-sm text-neutral-600 dark:text-neutral-300">
+            Listing under: <b>{agent.name}</b> ({agent.email})
+          </div>
+        )}
       </div>
 
-      {/* Image Section */}
-      <SectionCard title="Images" subtitle="Upload clear, well-lit photos (max 5).">
-        <ImageUploader images={images} setImages={setImages} />
-      </SectionCard>
+      {/* Agent Gate */}
+      {!agent && (
+        <AgentGate
+          onAgentFound={setAgent}
+          isLoading={lookupLoading}
+          error={lookupError}
+          clearError={() => setLookupError(null)}
+          fetchAgent={async (q) => {
+            if (!q?.trim()) return null;
+            const { found, agent } = await lookupStaff(q);
+            // Adapt the shape for your page state
+            if (found && agent) {
+              // what we keep in AddProperty state:
+              return {
+                id: agent.agentListId,         // store the agentListId for backend save
+                name: agent.fullName,
+                email: agent.email,
+                staffId: agent.staffId,        // handy if you need it later
+              };
+            }
+            return null;
+          }}
+        />
+      )}
 
-      {/* Property Information */}
-      <SectionCard title="Property Information">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Field label="Property name" required>
-            <input
-              className={inputBase}
-              placeholder="The Painted Lady"
-              value={form.title}
-              onChange={onChange("title")}
-            />
-          </Field>
-
-          <div className="grid grid-cols-3 gap-3">
-            <Field label="Currency" required>
-              <select
-                className={selectBase}
-                value={form.currency}
-                onChange={onChange("currency")}
-              >
-                <option>USD</option>
-                <option>CAD</option>
-              </select>
-            </Field>
-            <Field label="Price (min)" required>
-              <input
-                className={inputBase}
-                type="number"
-                min={0}
-                placeholder="690000"
-                value={form.priceMin}
-                onChange={onChange("priceMin")}
-              />
-            </Field>
-            <Field label="Price (max)" required>
-              <input
-                className={inputBase}
-                type="number"
-                min={0}
-                placeholder="735000"
-                value={form.priceMax}
-                onChange={onChange("priceMax")}
-              />
-            </Field>
-          </div>
-
-          <Field label="Property type" required>
-            <select
-              className={selectBase}
-              value={form.type}
-              onChange={onChange("type")}
-            >
-              <option value="">Select type</option>
-              {PROPERTY_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <Field label="Tenure">
-            <select
-              className={selectBase}
-              value={form.tenure}
-              onChange={onChange("tenure")}
-            >
-              <option value="">Select tenure</option>
-              {TENURE_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <div className="grid grid-cols-3 gap-3">
-            <Field label="Beds" required>
-              <input
-                className={inputBase}
-                type="number"
-                min={0}
-                value={form.beds}
-                onChange={onChange("beds")}
-              />
-            </Field>
-            <Field label="Baths" required>
-              <input
-                className={inputBase}
-                type="number"
-                min={0}
-                value={form.baths}
-                onChange={onChange("baths")}
-              />
-            </Field>
-            <Field label="Sqft" required>
-              <input
-                className={inputBase}
-                type="number"
-                min={0}
-                value={form.sqft}
-                onChange={onChange("sqft")}
-              />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Year built">
-              <input
-                className={inputBase}
-                type="number"
-                min={1700}
-                max={new Date().getFullYear()}
-                value={form.yearBuilt}
-                onChange={onChange("yearBuilt")}
-              />
-            </Field>
-            <Field label="Units">
-              <input
-                className={inputBase}
-                type="number"
-                min={0}
-                value={form.units}
-                onChange={onChange("units")}
-              />
-            </Field>
-          </div>
+      {/* Error summary */}
+      {Object.keys(errors).length > 0 && (
+        <div
+          ref={errorRef}
+          className="mt-4 mb-4 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-300"
+        >
+          <div className="font-medium">Please complete the required fields:</div>
+          <ul className="mt-2 list-disc pl-5 space-y-0.5">
+            {Object.keys(errors).map((k) => (
+              <li key={k}>{k}</li>
+            ))}
+          </ul>
         </div>
-      </SectionCard>
+      )}
 
-      {/* Location Information */}
-      <SectionCard title="Location Information">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Field label="Address" required>
-            <input
-              className={inputBase}
-              placeholder="1234 Baker Street"
-              value={form.address}
-              onChange={onChange("address")}
-            />
-          </Field>
-
-          <div className="grid grid-cols-3 gap-3">
-            <Field label="Street">
-              <input
-                className={inputBase}
-                value={form.street}
-                onChange={onChange("street")}
-              />
-            </Field>
-            <Field label="Street number">
-              <input
-                className={inputBase}
-                value={form.streetNo}
-                onChange={onChange("streetNo")}
-              />
-            </Field>
-            <Field label="Area">
-              <input
-                className={inputBase}
-                value={form.area}
-                onChange={onChange("area")}
-              />
-            </Field>
+      {/* Form (only after agent) */}
+      {agent && (
+        <>
+          <div className="mb-4">
+            <ListingTypeTabs mode={mode} setMode={setMode} />
           </div>
 
-          <div className="grid grid-cols-4 gap-3">
-            <Field label="City" required>
-              <input
-                className={inputBase}
-                value={form.city}
-                onChange={onChange("city")}
-              />
-            </Field>
-            <Field label="Province/State" required>
-              <input
-                className={inputBase}
-                value={form.province}
-                onChange={onChange("province")}
-              />
-            </Field>
-            <Field label="Postal/ZIP" required>
-              <input
-                className={inputBase}
-                value={form.postalCode}
-                onChange={onChange("postalCode")}
-              />
-            </Field>
-            <Field label="Country">
-              <input
-                className={inputBase}
-                value={form.country}
-                onChange={onChange("country")}
-              />
-            </Field>
-          </div>
-
-          <Field
-            label="Google map link"
-            hint="Paste a full Google Maps URL"
+          {/* Images */}
+          <SectionCard
+            title="Images"
+            subtitle="JPEG/JPG/PNG only, ≤1MB each, max 40."
           >
-            <input
-              className={inputBase}
-              placeholder="https://maps.google.com/…"
-              value={form.gmap}
-              onChange={onChange("gmap")}
-            />
-          </Field>
-        </div>
-      </SectionCard>
+            <ImageUploader images={images} setImages={setImages} />
+          </SectionCard>
 
-      {/* Interior Information */}
-      <SectionCard title="Interior Information">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Field label="Heating">
-            <select
-              className={selectBase}
-              value={form.heating}
-              onChange={onChange("heating")}
-            >
-              <option value="">Select heating</option>
-              {HEATING_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <Field label="Cooling">
-            <select
-              className={selectBase}
-              value={form.cooling}
-              onChange={onChange("cooling")}
-            >
-              <option value="">Select cooling</option>
-              {COOLING_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <Field label="Flooring">
-            <input
-              className={inputBase}
-              placeholder="Hardwood, Tile, Carpet"
-              value={form.flooring}
-              onChange={onChange("flooring")}
-            />
-          </Field>
-
-          <Field label="Appliances">
-            <input
-              className={inputBase}
-              placeholder="Fridge, Stove, Dishwasher"
-              value={form.appliances}
-              onChange={onChange("appliances")}
-            />
-          </Field>
-        </div>
-      </SectionCard>
-
-      {/* Exterior Information */}
-      <SectionCard title="Exterior Information">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <Field label="Lot size">
-            <input
-              className={inputBase}
-              placeholder="e.g., 6,000 sqft"
-              value={form.lotSize}
-              onChange={onChange("lotSize")}
-            />
-          </Field>
-
-          <Field label="Parking">
-            <select
-              className={selectBase}
-              value={form.parking}
-              onChange={onChange("parking")}
-            >
-              <option value="">Select parking</option>
-              {PARKING_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <Field label="View">
-            <select
-              className={selectBase}
-              value={form.view}
-              onChange={onChange("view")}
-            >
-              <option value="">Select view</option>
-              {VIEW_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </Field>
-
-          <Field label="Exterior features">
-            <input
-              className={inputBase}
-              placeholder="Garden, Fire pit, Fenced yard"
-              value={form.exteriorFeatures}
-              onChange={onChange("exteriorFeatures")}
-            />
-          </Field>
-        </div>
-      </SectionCard>
-
-      {/* Building & Community Information */}
-      <SectionCard title="Building & Community Information">
-        <div className="grid grid-cols-1 gap-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <Field label="HOA/Strata fee (monthly)">
-              <input
-                className={inputBase}
-                type="number"
-                min={0}
-                value={form.hoa}
-                onChange={onChange("hoa")}
+          {/* Conditional sections */}
+          {mode === "sale" ? (
+            <>
+              <PropertyInfoSale
+                form={form}
+                onChange={onChange}
+                required={requiredMap}
               />
-            </Field>
-            <div className="md:col-span-2">
-              <Field label="Community amenities">
-                <div className="flex flex-wrap gap-2">
-                  {HOA_AMENITIES.map((a) => {
-                    const active = form.hoaAmenities.includes(a);
-                    return (
-                      <button
-                        key={a}
-                        type="button"
-                        onClick={() => toggleAmenity(a)}
-                        className={`rounded-full border px-3 py-1.5 text-sm ${
-                          active
-                            ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300"
-                            : "border-neutral-300 text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800/60"
-                        }`}
-                      >
-                        {a}
-                      </button>
-                    );
-                  })}
-                </div>
-              </Field>
-            </div>
+              <LocationSection
+                form={form}
+                onChange={onChange}
+                required={requiredMap}
+              />
+              <InteriorSection
+                form={form}
+                onChange={onChange}
+                required={requiredMap}
+              />
+              <ExteriorSection form={form} onChange={onChange} />
+              <BuildingCommunitySection form={form} onChange={onChange} />
+              <FinancialSale form={form} onChange={onChange} />
+            </>
+          ) : (
+            <>
+              <PropertyInfoRent
+                form={form}
+                onChange={onChange}
+                required={requiredMap}
+              />
+              <LocationSection
+                form={form}
+                onChange={onChange}
+                required={requiredMap}
+              />
+              <InteriorSection
+                form={form}
+                onChange={onChange}
+                required={requiredMap}
+              />
+              <ExteriorSection form={form} onChange={onChange} />
+            </>
+          )}
+
+          {/* Actions */}
+          <div className="mt-6 flex justify-end gap-2">
+            <button
+              type="button"
+              className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800/60"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            >
+              Back to top
+            </button>
+            <button
+              type="submit"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 dark:bg-blue-500 dark:hover:bg-blue-400"
+            >
+              Save listing
+            </button>
           </div>
-        </div>
-      </SectionCard>
-
-      {/* Financial Information */}
-      <SectionCard title="Financial Information">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <Field label="Property taxes (annual)">
-            <input
-              className={inputBase}
-              type="number"
-              min={0}
-              value={form.taxes}
-              onChange={onChange("taxes")}
-            />
-          </Field>
-          <Field label="Tax year">
-            <input
-              className={inputBase}
-              type="number"
-              min={1990}
-              max={new Date().getFullYear()}
-              value={form.taxYear}
-              onChange={onChange("taxYear")}
-            />
-          </Field>
-          <Field label="Expected rent (if applicable)">
-            <input
-              className={inputBase}
-              type="number"
-              min={0}
-              value={form.rent}
-              onChange={onChange("rent")}
-            />
-          </Field>
-        </div>
-      </SectionCard>
-
-      {/* Legal & Additional Information */}
-      <SectionCard title="Legal & Additional Information">
-        <div className="grid grid-cols-1 gap-4">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <Field label="MLS® #" hint="Enter MLS ID if available">
-              <input
-                className={inputBase}
-                value={form.mls}
-                onChange={onChange("mls")}
-              />
-            </Field>
-            <Field label="Legal description">
-              <input
-                className={inputBase}
-                placeholder="Lot, Plan, District…"
-                value={form.legalDesc}
-                onChange={onChange("legalDesc")}
-              />
-            </Field>
-            <Field label="Disclosures">
-              <input
-                className={inputBase}
-                placeholder="e.g., PCDS available"
-                value={form.disclosures}
-                onChange={onChange("disclosures")}
-              />
-            </Field>
-          </div>
-
-          <Field label="Remarks / Description">
-            <textarea
-              className={textareaBase}
-              placeholder="Highlight the best features…"
-              value={form.remarks}
-              onChange={onChange("remarks")}
-            />
-          </Field>
-        </div>
-      </SectionCard>
-
-      {/* Bottom actions */}
-      <div className="mt-6 flex justify-end gap-2">
-        <button
-          type="button"
-          className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-800 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-800/60"
-          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-        >
-          Back to top
-        </button>
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-60 dark:bg-blue-500 dark:hover:bg-blue-400"
-        >
-          {submitting ? "Saving…" : "Save property"}
-        </button>
-      </div>
+        </>
+      )}
     </form>
   );
 }
