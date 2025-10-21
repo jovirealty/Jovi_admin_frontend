@@ -1,4 +1,3 @@
-// src/components/form/ListingTypeTabs.jsx
 export default function ListingTypeTabs({ mode, setMode }) {
   const base =
     "w-full sm:w-auto rounded-lg px-4 py-2 text-sm font-medium border transition";
