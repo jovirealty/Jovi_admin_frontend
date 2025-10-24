@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import useStaffPropertyListing from "../../hooks/addproperty/admin/useStaffPropertyListing";
+
 import SectionCard from "../../components/form/SectionCard";
 import AgentGate from "../../components/form/AgentGate";
 import ListingTypeTabs from "../../components/form/ListingTypeTabs";
@@ -739,6 +741,13 @@ export default function AddProperty() {
   const [errors, setErrors] = useState({});
   const errorRef = useRef(null);
 
+  const { createListing, 
+    loading: submitLoading, 
+    error: submitError, 
+    setError: setSubmitError, 
+    data: submitData 
+  } = useStaffPropertyListing();
+
   const {
     lookupStaff,
     loading: lookupLoading,
@@ -776,20 +785,26 @@ export default function AddProperty() {
     [form, agent, mode, media]
   );
 
-  const onSubmit = (e) => {
+  const onSubmit = async (e) => {
     e.preventDefault();
     if (!agent) return;
 
     const v = validate(form, mode);
     setErrors(v);
-
     if (Object.keys(v).length) {
       errorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
       return;
     }
 
-    console.log("LISTING_PAYLOAD", submitPayload);
-    alert("Valid! Check console for the full payload.");
+    try {
+      const res = await createListing({ agent, mode, form, media });
+      console.log("CREATE_LISTING_RESPONSE", res);
+      alert("Listing created successfully!");
+      // (optional) reset form/media here
+    } catch (err) {
+      // error already handled in hook; this makes sure inline banner is visible
+      errorRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   const requiredMap = mode === "sale" ? REQUIRED_SALE : REQUIRED_RENT;
