@@ -79,7 +79,7 @@ export default function useStaffPropertyListing() {
 
             const payload = {
                 userId: String(agent?.staffId),                 // staff _id
-                agentListId: agent?.id,                 // agentListId
+                agentListId: agent?.id,                         // agentListId
                 agentDetail: { fullName: agent?.name, email: agent?.email },
                 propertyDetails,
             };
@@ -113,8 +113,8 @@ export default function useStaffPropertyListing() {
             return json;
         }
         catch (error) { 
-            setError(e.message || "Something went wrong.");
-            throw e;
+            setError(error?.message || "Something went wrong.");
+            throw error;
         }
         finally { setLoading(false); }
     }, []);
