@@ -8,11 +8,14 @@ import NotFound from "../../pages/NotFound";
 import Placeholder from "../../pages/Placeholder";
 import PropertyList from "../../pages/properties/PropertyList";
 import AddProperty from "../../pages/properties/AddProperty";
+import ResourceList from "../../pages/resources/ResourceList";
 
 import AdministratorsList from "../../pages/administrators/AdministratorsList";
 import CreateAdministrator from "../../pages/administrators/CreateAdministrator";
 import EditAdministrator from "../../pages/administrators/EditAdministrator";
 import AdministratorShowDrawer from "../../pages/administrators/AdministratorShowDrawer";
+import ResourceAdd from "../../pages/resources/ResourceAdd";
+import ResourceEdit from "../../pages/resources/ResourceEdit";
 
 const adminRoutes = {
     path: "/admin",
@@ -38,6 +41,11 @@ const adminRoutes = {
                 // Property listing routes
                 { path: 'property', element: <PropertyList /> },
                 { path: 'property/add-property', element: <AddProperty />},
+
+                // Resource routes
+                { path: 'resources', element: <ResourceList /> },
+                { path: 'resources/new', element: <ResourceAdd /> },
+                { path: 'resources/edit/:id', element: <ResourceEdit /> },
                 // Your other areas (stubs for now)
                 { path: 'customers', element: <Placeholder title="Customers" /> },
                 { path: 'categories', element: <Placeholder title="Categories" /> },
