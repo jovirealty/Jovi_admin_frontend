@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 // UI components
 import Breadcrumbs from "../../components/breadcrumbs/Breadcrumbs";
 import ContentEditor from "../../components/contentEditor/ContentEditor";
+import useResourceCreation from "../../hooks/resourceshooks/useResourceCreation";
 
 // Tiptap (imported in ContentEditor)
 
@@ -55,6 +56,7 @@ const Textarea = ({ className = "", ...props }) => (
 
 export default function ResourceAdd() {
   const navigate = useNavigate();
+  const { createResource, loading, error } = useResourceCreation();
 
   // form state
   const [category, setCategory] = useState("blog");
@@ -70,7 +72,7 @@ export default function ResourceAdd() {
   // properties
   const [tags, setTags] = useState(["design", "ux"]);
   const [metaTitle, setMetaTitle] = useState("");
-  const [metaDesc, setMetaDesc] = useState("");
+  const [metaDescription, setMetaDescription] = useState("");  // Renamed for schema consistency
   const [metaKeywords, setMetaKeywords] = useState("");
   const [resourceMedia, setResourceMedia] = useState("");
 
@@ -111,25 +113,32 @@ export default function ResourceAdd() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    // In real app: Upload coverFile to storage (e.g., DO Spaces), get URL, POST payload
-    const payload = {
-      category,
-      title: title.trim(),
-      subTitle: subTitle.trim(),
-      content, // Full HTML from editor.getHTML() – includes tags/images
-      coverPhoto: coverUrl, // Replace with uploaded URL
-      properties: {
-        tags,
-        metaTitle: metaTitle.trim(),
-        metaDescription: metaDesc.trim(),
-        metaKeywords: metaKeywords.trim(),
-      },
-      resourceMedia: resourceMedia.split(',').map(m => m.trim()).filter(Boolean),
-      publish,
-    };
-    console.log("Create payload:", payload); // Mock: Replace with API POST
-    alert("Resource created! (Mock – check console for payload)");
-    navigate("/admin/resources");
+    if (error) {
+      alert(error);
+      return;
+    }
+
+    try {
+      await createResource({
+        category,
+        title,
+        subTitle,
+        content,
+        properties: {
+          tags,
+          metaTitle,
+          metaDescription: "this is static from code",
+          metaKeywords,
+        },
+        resourceMedia: resourceMedia.split(',').map(m => m.trim()).filter(Boolean),
+        publish,
+        coverFile,
+      });
+      alert("Resource created successfully!");
+      navigate("/admin/resources");
+    } catch (err) {
+      alert(error || "Failed to create resource.");
+    }
   };
 
   const crumbs = useMemo(
@@ -312,8 +321,8 @@ export default function ResourceAdd() {
                 Meta description
               </label>
               <Textarea
-                value={metaDesc}
-                onChange={(e) => setMetaDesc(e.target.value)}
+                value={metaDescription}
+                onChange={(e) => setMetaDescription(e.target.value)}
                 placeholder="Brief description for SEO"
                 rows={3}
               />
@@ -350,8 +359,8 @@ export default function ResourceAdd() {
               <button type="button" className={btnGhost} onClick={() => navigate(-1)}>
                 Cancel
               </button>
-              <button type="submit" className={btnBlue}>
-                Create post
+              <button type="submit" className={btnBlue} disabled={loading}>
+                {loading ? "Creating..." : "Create post"}
               </button>
             </div>
           </div>
