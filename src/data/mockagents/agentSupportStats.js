@@ -1,0 +1,83 @@
+// src/data/mockagents/agentSupportStats.js
+export const supportStats = {
+  totalIncidents: 23,
+  active: 5,
+  resolved: 15,
+  inProgress: 3,
+};
+
+// src/data/mockagents/agentSupportTickets.js
+export const agentSupportTickets = [
+  {
+    id: 1,
+    title: "Issue with Property Listing Upload",
+    description: "Unable to upload images for new listing - error message appears.",
+    category: "Technical Issue",
+    status: "Open",
+    date: "Wed, Oct 2, 2025",
+    assignedTo: "Super Admin",
+  },
+  {
+    id: 2,
+    title: "Billing Inquiry for Premium Subscription",
+    description: "Question about the recent charge on my account.",
+    category: "Billing",
+    status: "Pending",
+    date: "Sun, Sep 7, 2025",
+    assignedTo: "Super Admin",
+  },
+  {
+    id: 3,
+    title: "General Question on MLS Integration",
+    description: "How to sync MLS data with the platform?",
+    category: "General Inquiry",
+    status: "Open",
+    date: "Fri, Oct 1, 2025",
+    assignedTo: "Super Admin",
+  },
+  {
+    id: 4,
+    title: "Error in Lead Management Dashboard",
+    description: "Dashboard not loading leads from the last 30 days correctly.",
+    category: "Technical Issue",
+    status: "Closed",
+    date: "Wed, Sep 18, 2025",
+    assignedTo: "Super Admin",
+  },
+  {
+    id: 5,
+    title: "Subscription Renewal Notification Missing",
+    description: "Did not receive email alert for upcoming renewal.",
+    category: "Billing",
+    status: "Closed",
+    date: "Fri, Sep 10, 2025",
+    assignedTo: "Super Admin",
+  },
+  {
+    id: 6,
+    title: "Feature Request: Advanced Search Filters",
+    description: "Need more customizable filters for property searches.",
+    category: "General Inquiry",
+    status: "Pending",
+    date: "Mon, Oct 20, 2025",
+    assignedTo: "Super Admin",
+  },
+  {
+    id: 7,
+    title: "API Access Permissions Issue",
+    description: "Unable to grant API access to third-party integration tool.",
+    category: "Technical Issue",
+    status: "Closed",
+    date: "Tue, Aug 15, 2025",
+    assignedTo: "Super Admin",
+  },
+  {
+    id: 8,
+    title: "Training Video Access Problem",
+    description: "Videos in the training hub are not playing on mobile devices.",
+    category: "General Inquiry",
+    status: "Closed",
+    date: "Thu, Jul 28, 2025",
+    assignedTo: "Super Admin",
+  },
+];
