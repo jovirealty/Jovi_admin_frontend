@@ -12,7 +12,7 @@ import TrainingHub from "../../pages/traininghub/agents/TrainingHub";
 import MarketingMaterial from "../../pages/marketingmaterial/MarketingMaterial";
 import AgentSupport from "../../pages/support/agent/AgentSupport";
 import AgentOrders from "../../pages/orders/agent/AgentOrders";
-import AgentLegalInformation from "../../pages/legalinformation/agent/AgentLegalInformation";
+// import AgentLegalInformation from "../../pages/legalinformation/agent/AgentLegalInformation";
 import AgentProfile from "../../pages/profile/agent/AgentProfile";
 import NewSupportTicket from "../../pages/support/agent/NewSupportTicket";
 import MarketingTemplateDetails from "../../pages/marketingmaterial/MarketingTemplateDetails";
