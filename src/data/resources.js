@@ -4,7 +4,7 @@ export const mockResources = [
     "category": "blog",
     "title": "Sample Blog Title 1",
     "subTitle": "Subtitle for Blog entry 1",
-    "coverPhoto": "https://images.unsplash.com/photo-100?q=80&w=1200&auto=format&fit=crop",
+    "coverPhoto": "https://plus.unsplash.com/premium_photo-1663089688180-444ff0066e5d?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2340",
     "content": "<p>Sample content for Blog 1. Lorem ipsum dolor sit amet.</p>",
     "properties": {
       "tags": [
@@ -33,7 +33,7 @@ export const mockResources = [
     "category": "news",
     "title": "Sample News Title 2",
     "subTitle": "Subtitle for News entry 2",
-    "coverPhoto": "https://images.unsplash.com/photo-200?q=80&w=1200&auto=format&fit=crop",
+    "coverPhoto": "https://plus.unsplash.com/premium_photo-1684179641331-e89c6320b6a9?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWFya2V0aW5nfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=900",
     "content": "<p>Sample content for News 2. Lorem ipsum dolor sit amet.</p>",
     "properties": {
       "tags": [
@@ -62,7 +62,7 @@ export const mockResources = [
     "category": "e-book",
     "title": "Sample E-book Title 3",
     "subTitle": "Subtitle for E-book entry 3",
-    "coverPhoto": "https://images.unsplash.com/photo-300?q=80&w=1200&auto=format&fit=crop",
+    "coverPhoto": "https://plus.unsplash.com/premium_photo-1757686080642-256282996806?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxN3x8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=900",
     "content": "<p>Sample content for E-book 3. Lorem ipsum dolor sit amet.</p>",
     "properties": {
       "tags": [
@@ -91,7 +91,7 @@ export const mockResources = [
     "category": "podcast",
     "title": "Sample Podcast Title 4",
     "subTitle": "Subtitle for Podcast entry 4",
-    "coverPhoto": "https://images.unsplash.com/photo-400?q=80&w=1200&auto=format&fit=crop",
+    "coverPhoto": "https://images.unsplash.com/photo-1578973615934-8d9cdb0792b4?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGNhbmFkYXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=900",
     "content": "<p>Sample content for Podcast 4. Lorem ipsum dolor sit amet.</p>",
     "properties": {
       "tags": [
@@ -120,7 +120,7 @@ export const mockResources = [
     "category": "blog",
     "title": "Sample Blog Title 5",
     "subTitle": "Subtitle for Blog entry 5",
-    "coverPhoto": "https://images.unsplash.com/photo-500?q=80&w=1200&auto=format&fit=crop",
+    "coverPhoto": "https://plus.unsplash.com/premium_photo-1757686080642-256282996806?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxN3x8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=900",
     "content": "<p>Sample content for Blog 5. Lorem ipsum dolor sit amet.</p>",
     "properties": {
       "tags": [
@@ -149,7 +149,7 @@ export const mockResources = [
     "category": "news",
     "title": "Sample News Title 6",
     "subTitle": "Subtitle for News entry 6",
-    "coverPhoto": "https://images.unsplash.com/photo-600?q=80&w=1200&auto=format&fit=crop",
+    "coverPhoto": "https://plus.unsplash.com/premium_photo-1673241100156-2e04fca1a4af?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fGNhbmFkYXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=900",
     "content": "<p>Sample content for News 6. Lorem ipsum dolor sit amet.</p>",
     "properties": {
       "tags": [
@@ -178,7 +178,7 @@ export const mockResources = [
     "category": "e-book",
     "title": "Sample E-book Title 7",
     "subTitle": "Subtitle for E-book entry 7",
-    "coverPhoto": "https://images.unsplash.com/photo-700?q=80&w=1200&auto=format&fit=crop",
+    "coverPhoto": "https://images.unsplash.com/photo-1514924013411-cbf25faa35bb?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fGNhbmFkYXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=900",
     "content": "<p>Sample content for E-book 7. Lorem ipsum dolor sit amet.</p>",
     "properties": {
       "tags": [
@@ -207,7 +207,7 @@ export const mockResources = [
     "category": "podcast",
     "title": "Sample Podcast Title 8",
     "subTitle": "Subtitle for Podcast entry 8",
-    "coverPhoto": "https://images.unsplash.com/photo-800?q=80&w=1200&auto=format&fit=crop",
+    "coverPhoto": "https://plus.unsplash.com/premium_photo-1757686080642-256282996806?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwxN3x8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=60&w=900",
     "content": "<p>Sample content for Podcast 8. Lorem ipsum dolor sit amet.</p>",
     "properties": {
       "tags": [
@@ -236,7 +236,7 @@ export const mockResources = [
     "category": "blog",
     "title": "Sample Blog Title 9",
     "subTitle": "Subtitle for Blog entry 9",
-    "coverPhoto": "https://images.unsplash.com/photo-900?q=80&w=1200&auto=format&fit=crop",
+    "coverPhoto": "https://plus.unsplash.com/premium_photo-1672116453118-5971acb7b93b?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTd8fGNhbmFkYXxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=900",
     "content": "<p>Sample content for Blog 9. Lorem ipsum dolor sit amet.</p>",
     "properties": {
       "tags": [
@@ -265,7 +265,7 @@ export const mockResources = [
     "category": "news",
     "title": "Sample News Title 10",
     "subTitle": "Subtitle for News entry 10",
-    "coverPhoto": "https://images.unsplash.com/photo-1000?q=80&w=1200&auto=format&fit=crop",
+    "coverPhoto": "https://plus.unsplash.com/premium_photo-1676657955507-b1f993556e80?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8dXNhfGVufDB8fDB8fHww&auto=format&fit=crop&q=60&w=900",
     "content": "<p>Sample content for News 10. Lorem ipsum dolor sit amet.</p>",
     "properties": {
       "tags": [
