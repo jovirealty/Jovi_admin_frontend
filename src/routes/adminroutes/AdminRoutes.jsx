@@ -3,7 +3,7 @@ import ProtectedRoute from "../ProtectedRoute";
 
 // Pages
 import DashboardLayout from "../../layouts/DashboardLayout";
-import Dashboard from "../../pages/Dashboard";
+import Dashboard from "../../pages/dashboard/admin/Dashboard";
 import NotFound from "../../pages/NotFound";
 import Placeholder from "../../pages/Placeholder";
 import PropertyList from "../../pages/properties/PropertyList";
@@ -16,6 +16,7 @@ import EditAdministrator from "../../pages/administrators/EditAdministrator";
 import AdministratorShowDrawer from "../../pages/administrators/AdministratorShowDrawer";
 import ResourceAdd from "../../pages/resources/ResourceAdd";
 import ResourceEdit from "../../pages/resources/ResourceEdit";
+import DisplayProperty from "../../pages/properties/DisplayProperty";
 
 const adminRoutes = {
     path: "/admin",
@@ -41,6 +42,7 @@ const adminRoutes = {
                 // Property listing routes
                 { path: 'property', element: <PropertyList /> },
                 { path: 'property/add-property', element: <AddProperty />},
+                { path: 'property/property-detail/:id', element: <DisplayProperty />  },
 
                 // Resource routes
                 { path: 'resources', element: <ResourceList /> },
