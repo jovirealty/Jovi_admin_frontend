@@ -69,7 +69,7 @@ export default function PropertyList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
-  const goShow = (id) => navigate(`/admin/property/${id}/show`);
+  const goShow = (id) => navigate(`/admin/property/property-detail/${id}`);
   const goEdit = (id) => navigate(`/admin/property/${id}/edit`);
 
   return (
