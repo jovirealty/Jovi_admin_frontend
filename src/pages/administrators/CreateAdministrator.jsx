@@ -84,7 +84,7 @@ export default function CreateAdministrator() {
   };
 
   // generate password
-  const onGenerate = () => setPassword(genPassword(8));
+  const onGenerate = () => setPassword(genPassword(10));
 
   // submit
   const onSubmit = async (e) => {
