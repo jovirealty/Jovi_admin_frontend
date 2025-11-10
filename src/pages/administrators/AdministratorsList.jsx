@@ -8,7 +8,7 @@ const Pill = ({ value }) => (
   <span
     className={[
       "inline-flex h-7 min-w-14 items-center justify-center rounded-full px-3 text-xs font-medium",
-      value ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600",
+      value ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300" : "bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400",
     ].join(" ")}
   >
     {value ? "Yes" : "No"}
@@ -29,16 +29,16 @@ function RowMenu({ onShow, onEdit, onDelete, onClose }) {
   return (
     <div
       ref={ref}
-      className="absolute right-3 top-8 z-20 w-44 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg"
+      className="absolute right-3 top-8 z-20 w-44 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 shadow-lg"
     >
-      <button onClick={onShow} className="flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-gray-50">
+      <button onClick={onShow} className="flex w-full items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
         <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
           <rect x="3" y="5" width="18" height="14" rx="2" />
           <path d="M7 9h10M7 13h6" />
         </svg>
         Show
       </button>
-      <button onClick={onEdit} className="flex w-full items-center gap-3 px-3 py-2 text-sm hover:bg-gray-50">
+      <button onClick={onEdit} className="flex w-full items-center gap-3 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
         <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M12 20h9" />
           <path d="M16.5 3.5l4 4L7 21l-4 1 1-4 12.5-14.5z" />
@@ -138,19 +138,19 @@ export default function AdministratorsList() {
 
   return (
     <div className="p-6">
-      <div className="mb-4 text-sm text-gray-500">
+      <div className="mb-4 text-sm text-gray-500 dark:text-gray-400">
         <button onClick={() => navigate("/admin/dashboard")} className="hover:underline focus:outline-none">
           Dashboard
         </button>{" "}
-        / <span className="text-gray-700">Administrators</span>
+        / <span className="text-gray-700 dark:text-gray-300">Administrators</span>
       </div>
 
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Administrators</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Administrators</h1>
         <div className="flex items-center gap-3">
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium hover:bg-gray-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
             onClick={() => alert("Filters coming soon")}
           >
             <svg viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2">
@@ -172,8 +172,8 @@ export default function AdministratorsList() {
       </div>
 
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-sm text-gray-500">
-          <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-gray-100 px-2 font-medium text-gray-700">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 px-2 font-medium text-gray-700 dark:text-gray-300">
             {total}
           </span>{" "}
           total
@@ -186,15 +186,15 @@ export default function AdministratorsList() {
               setQuery(e.target.value);
               setPage(1);
             }}
-            className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none ring-0 placeholder:text-gray-400 focus:border-blue-500"
+            className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 px-3 py-2 text-sm outline-none ring-0 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:border-blue-500 dark:focus:border-blue-400 text-gray-900 dark:text-white"
           />
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
         <div className="overflow-x-auto">
           <table className="min-w-full whitespace-nowrap text-left">
-            <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+            <thead className="bg-gray-50 dark:bg-gray-800 text-xs uppercase text-gray-500 dark:text-gray-400">
               <tr>
                 <th className="px-4 py-3 font-medium">FullName</th>
                 <th className="px-4 py-3 font-medium">licenseNumber</th>
@@ -205,10 +205,10 @@ export default function AdministratorsList() {
                 <th className="w-10 px-4 py-3" />
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100 text-sm">
+            <tbody className="divide-y divide-gray-100 dark:divide-gray-700 text-sm text-gray-900 dark:text-gray-100">
               {loading && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-gray-500">
+                  <td colSpan={8} className="px-4 py-10 text-center text-gray-500 dark:text-gray-400">
                     Loading…
                   </td>
                 </tr>
@@ -216,7 +216,7 @@ export default function AdministratorsList() {
 
               {!loading && error && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-red-600">
+                  <td colSpan={8} className="px-4 py-10 text-center text-red-600 dark:text-red-400">
                     Error: {error}
                   </td>
                 </tr>
@@ -225,11 +225,11 @@ export default function AdministratorsList() {
               {!loading &&
                 !error &&
                 rows.map((row) => (
-                  <tr key={row.id} className="hover:bg-gray-50/60">
+                  <tr key={row.id} className="hover:bg-gray-50/60 dark:hover:bg-gray-800/60">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <Avatar src={row.photoUrl} alt={row.fullName} size={20} />
-                        <div className="font-medium text-gray-900">{row.fullName}</div>
+                        <div className="font-medium text-gray-900 dark:text-white">{row.fullName}</div>
                       </div>
                     </td>
                     <td className="px-4 py-3">{row.licenseNumber}</td>
@@ -241,11 +241,11 @@ export default function AdministratorsList() {
                     <td className="px-4 py-3">{row.personalRealEstateCorporationName}</td>
                     <td className="relative px-4 py-3">
                       <button
-                        className="rounded p-1 hover:bg-gray-100"
+                        className="rounded p-1 hover:bg-gray-100 dark:hover:bg-gray-800"
                         aria-label="Row actions"
                         onClick={() => setOpenMenuId((s) => (s === row.id ? null : row.id))}
                       >
-                        <svg viewBox="0 0 20 20" className="size-5 text-gray-500">
+                        <svg viewBox="0 0 20 20" className="size-5 text-gray-500 dark:text-gray-400">
                           <circle cx="3" cy="10" r="2" />
                           <circle cx="10" cy="10" r="2" />
                           <circle cx="17" cy="10" r="2" />
@@ -271,7 +271,7 @@ export default function AdministratorsList() {
 
               {!loading && !error && rows.length === 0 && (
                 <tr>
-                  <td className="px-4 py-10 text-center text-gray-500" colSpan={8}>
+                  <td className="px-4 py-10 text-center text-gray-500 dark:text-gray-400" colSpan={8}>
                     No administrators found.
                   </td>
                 </tr>
@@ -280,21 +280,21 @@ export default function AdministratorsList() {
           </table>
         </div>
 
-        <div className="flex items-center justify-between border-t border-gray-200 px-4 py-3 text-sm">
-          <div className="text-gray-600">
+        <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-700 px-4 py-3 text-sm">
+          <div className="text-gray-600 dark:text-gray-400">
             Page <span className="font-medium">{page}</span> of{" "}
             <span className="font-medium">{pages}</span>
           </div>
           <div className="flex items-center gap-2">
             <button
-              className="rounded-lg border border-gray-300 px-3 py-1.5 disabled:opacity-40"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 disabled:opacity-40 text-gray-700 dark:text-gray-300"
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page <= 1}
             >
               Previous
             </button>
             <button
-              className="rounded-lg border border-gray-300 px-3 py-1.5 disabled:opacity-40"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-1.5 disabled:opacity-40 text-gray-700 dark:text-gray-300"
               onClick={() => setPage((p) => Math.min(pages || 1, p + 1))}
               disabled={page >= (pages || 1)}
             >
