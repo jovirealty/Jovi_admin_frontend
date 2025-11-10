@@ -126,22 +126,22 @@ export default function CreateAdministrator() {
   return (
     <div className="p-6">
       {/* breadcrumbs */}
-      <div className="mb-4 text-sm text-gray-500">
+      <div className="mb-4 text-sm text-gray-500 dark:text-gray-400">
         <Link to="/admin/dashboard" className="hover:underline">Dashboard</Link> /{" "}
         <Link to="/admin/administrators" className="hover:underline">Administrators</Link> /{" "}
-        <span className="text-gray-700">Create new</span>
+        <span className="text-gray-700 dark:text-gray-300">Create new</span>
       </div>
 
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight">Create new</h1>
+      <h1 className="mb-6 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Create new</h1>
 
       <form
         onSubmit={onSubmit}
-        className="mx-auto max-w-4xl rounded-xl border border-gray-200 bg-white p-6"
+        className="mx-auto max-w-4xl rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6"
       >
         <div className="grid gap-5">
           {/* Email */}
           <div className="grid gap-2">
-            <label className="text-sm font-medium text-gray-700">Email</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
             <input
               type="email"
               required
@@ -149,8 +149,8 @@ export default function CreateAdministrator() {
               onChange={(e) => setEmail(e.target.value)}
               onBlur={runLookup}
               className={[
-                "rounded-lg border px-3 py-2 text-sm outline-none focus:border-indigo-500",
-                errEmail ? "border-red-300" : "border-gray-300",
+                "rounded-lg border dark:border-gray-600 px-3 py-2 text-sm outline-none focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white",
+                errEmail ? "border-red-300 dark:border-red-400" : "border-gray-300",
               ].join(" ")}
               placeholder="name@jovirealty.com"
             />
@@ -158,12 +158,12 @@ export default function CreateAdministrator() {
 
             {/* Lookup status */}
             {!superAdmin && (
-              <div className="text-xs text-gray-500">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
                 {checking ? "Checking agent list…" :
                   agent?.id ? (
                     <>
-                      Agent found: <span className="font-medium">{agent.fullName}</span>{" "}
-                      <span className="text-gray-400">(# {agent.id})</span>
+                      Agent found: <span className="font-medium text-gray-900 dark:text-white">{agent.fullName}</span>{" "}
+                      <span className="text-gray-400 dark:text-gray-500">(# {agent.id})</span>
                     </>
                   ) : (
                     "No agent ID found yet"
@@ -176,15 +176,15 @@ export default function CreateAdministrator() {
           {/* Name (only for super admins) */}
           {superAdmin && (
             <div className="grid gap-2">
-              <label className="text-sm font-medium text-gray-700">Name</label>
+              <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
               <input
                 type="text"
                 required
                 value={nameInput}
                 onChange={(e) => setNameInput(e.target.value)}
                 className={[
-                  "rounded-lg border px-3 py-2 text-sm outline-none focus:border-indigo-500",
-                  errName ? "border-red-300" : "border-gray-300",
+                  "rounded-lg border dark:border-gray-600 px-3 py-2 text-sm outline-none focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white",
+                  errName ? "border-red-300 dark:border-red-400" : "border-gray-300",
                 ].join(" ")}
                 placeholder="Full name"
               />
@@ -194,7 +194,7 @@ export default function CreateAdministrator() {
 
           {/* Password */}
           <div className="grid gap-2">
-            <label className="text-sm font-medium text-gray-700">Password</label>
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
             <div className="flex gap-2">
               <div className="relative w-full">
                 <input
@@ -203,8 +203,8 @@ export default function CreateAdministrator() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className={[
-                    "w-full rounded-lg border px-3 py-2 pr-10 text-sm outline-none focus:border-indigo-500",
-                    errPassword ? "border-red-300" : "border-gray-300",
+                    "w-full rounded-lg border dark:border-gray-600 px-3 py-2 pr-10 text-sm outline-none focus:border-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-white",
+                    errPassword ? "border-red-300 dark:border-red-400" : "border-gray-300",
                   ].join(" ")}
                   placeholder="Click Generate or type…"
                   inputMode="text"
@@ -212,7 +212,7 @@ export default function CreateAdministrator() {
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  className="absolute inset-y-0 right-2 flex items-center p-1 text-gray-500 hover:text-gray-700"
+                  className="absolute inset-y-0 right-2 flex items-center p-1 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   title={showPassword ? "Hide password" : "Show password"}
                 >
@@ -232,13 +232,13 @@ export default function CreateAdministrator() {
               <button
                 type="button"
                 onClick={onGenerate}
-                className="whitespace-nowrap rounded-lg border border-gray-300 px-3 py-2 text-sm hover:bg-gray-50"
+                className="whitespace-nowrap rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                 title="Generate a new secure password"
               >
                 Generate
               </button>
             </div>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               8 characters, must include symbol, uppercase, lowercase, and number.
             </p>
             {errPassword && <p className="text-xs text-red-600">{errPassword}</p>}
@@ -259,7 +259,7 @@ export default function CreateAdministrator() {
 
           {/* Form error */}
           {formError && (
-            <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="rounded-md border border-red-200 dark:border-red-800/50 bg-red-50 dark:bg-red-900/10 px-3 py-2 text-sm text-red-700 dark:text-red-300">
               {formError}
             </div>
           )}
@@ -268,7 +268,7 @@ export default function CreateAdministrator() {
           <div className="flex items-center justify-end gap-3 pt-2">
             <Link
               to="/admin/administrators"
-              className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-gray-50"
+              className="rounded-lg border border-gray-300 dark:border-gray-600 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               Cancel
             </Link>
