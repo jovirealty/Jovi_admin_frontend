@@ -49,13 +49,13 @@ const adminRoutes = {
                 { path: 'resources/new', element: <ResourceAdd /> },
                 { path: 'resources/edit/:id', element: <ResourceEdit /> },
                 // Your other areas (stubs for now)
-                { path: 'customers', element: <Placeholder title="Customers" /> },
+                // { path: 'customers', element: <Placeholder title="Customers" /> },
                 { path: 'categories', element: <Placeholder title="Categories" /> },
                 { path: 'products', element: <Placeholder title="Products" /> },
-                { path: 'orders', element: <Placeholder title="Orders" /> },
-                { path: 'matrix', element: <Placeholder title="Matrix" /> },
-                { path: 'matrix/users', element: <Placeholder title="Matrix Users" /> },
-                { path: 'matrix/rooms', element: <Placeholder title="Matrix Rooms" /> },
+                // { path: 'orders', element: <Placeholder title="Orders" /> },
+                // { path: 'matrix', element: <Placeholder title="Matrix" /> },
+                // { path: 'matrix/users', element: <Placeholder title="Matrix Users" /> },
+                // { path: 'matrix/rooms', element: <Placeholder title="Matrix Rooms" /> },
 
                 { path: '/admin/*', element: <NotFound /> },
             ],
