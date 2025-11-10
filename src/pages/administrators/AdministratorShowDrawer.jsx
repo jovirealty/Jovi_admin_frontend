@@ -4,7 +4,7 @@ import { getStaffAccount } from "../../hooks/useStaffAccounts";
 import { Avatar } from "../../components/avatar/Avatar";
 
 const Pill = ({ value }) => (
-  <span className="inline-flex h-7 min-w-14 items-center justify-center rounded-full bg-gray-100 px-3 text-xs font-medium text-gray-600">
+  <span className="inline-flex h-7 min-w-14 items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 px-3 text-xs font-medium text-gray-600 dark:text-gray-400">
     {value ? "Yes" : "No"}
   </span>
 );
@@ -70,20 +70,20 @@ export default function AdministratorShowDrawer() {
   return (
     <>
       <div className="fixed inset-0 z-40 bg-black/30" onClick={close} />
-      <aside className="fixed right-0 top-0 z-50 h-full w-[440px] overflow-y-auto border-l border-gray-200 bg-white p-6">
+      <aside className="fixed right-0 top-0 z-50 h-full w-[440px] overflow-y-auto border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6">
         {/* Header */}
         
         
 
         {loading || !admin ? (
-          <div className="text-gray-500">Loading…</div>
+          <div className="text-gray-500 dark:text-gray-400">Loading…</div>
         ) : (
           <>
             <div className="mb-6 flex items-center justify-between">
               <button
                 aria-label="Close"
                 onClick={close}
-                className="inline-flex size-9 items-center justify-center rounded-full border border-gray-300 hover:bg-gray-50"
+                className="inline-flex size-9 items-center justify-center rounded-full border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800"
                 title="Close"
               >
                 <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth="2">
@@ -94,7 +94,7 @@ export default function AdministratorShowDrawer() {
               <div className="flex items-center gap-3">
                 <Link
                   to={`/admin/administrators/${admin._id}/edit`}
-                  className="rounded-lg border border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 hover:bg-blue-50"
+                  className="rounded-lg border border-blue-600 dark:border-blue-500 px-4 py-2 text-sm font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50"
                 >
                   Edit
                 </Link>
@@ -104,28 +104,28 @@ export default function AdministratorShowDrawer() {
               </div>
             </div>
 
-            <h2 className="mb-6 text-2xl font-semibold tracking-tight">Show</h2>
+            <h2 className="mb-6 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Show</h2>
 
             <div className="space-y-6 text-sm">
               {/* Top card with avatar + name/email */}
               <div className="flex items-center gap-3">
                 <Avatar src={admin.photoUrl} alt={admin.fullName || admin.email} size={56} className="rounded-xl" />
                 <div>
-                  <div className="text-base font-semibold text-gray-900">
+                  <div className="text-base font-semibold text-gray-900 dark:text-white">
                     {admin.fullName || admin.email}
                   </div>
-                  <div className="text-gray-500">{admin.email}</div>
+                  <div className="text-gray-500 dark:text-gray-400">{admin.email}</div>
                 </div>
               </div>
 
               {/* Core fields */}
               <div>
-                <div className="mb-1 text-gray-500">Agent ID</div>
-                <div className="font-medium text-gray-900">{String(admin.agentListId)}</div>
+                <div className="mb-1 text-gray-500 dark:text-gray-400">Agent ID</div>
+                <div className="font-medium text-gray-900 dark:text-white">{String(admin.agentListId)}</div>
               </div>
 
               <div>
-                <div className="mb-1 text-gray-500">Is Agent?</div>
+                <div className="mb-1 text-gray-500 dark:text-gray-400">Is Agent?</div>
                 <Pill value={Array.isArray(admin.roles) && admin.roles.includes("agent")} />
               </div>
 
@@ -133,36 +133,36 @@ export default function AdministratorShowDrawer() {
               {Array.isArray(admin.roles) && admin.roles.includes("agent") && (
                 <>
                   <div>
-                    <div className="mb-1 text-gray-500">MLS ID</div>
-                    <div className="text-gray-900">{admin.mlsId || ""}</div>
+                    <div className="mb-1 text-gray-500 dark:text-gray-400">MLS ID</div>
+                    <div className="text-gray-900 dark:text-white">{admin.mlsId || ""}</div>
                   </div>
                   <div>
-                    <div className="mb-1 text-gray-500">License Number</div>
-                    <div className="text-gray-900">{admin.licenseNumber || ""}</div>
+                    <div className="mb-1 text-gray-500 dark:text-gray-400">License Number</div>
+                    <div className="text-gray-900 dark:text-white">{admin.licenseNumber || ""}</div>
                   </div>
                   <div>
-                    <div className="mb-1 text-gray-500">Licensed As</div>
-                    <div className="text-gray-900">{admin.licensedAs || ""}</div>
+                    <div className="mb-1 text-gray-500 dark:text-gray-400">Licensed As</div>
+                    <div className="text-gray-900 dark:text-white">{admin.licensedAs || ""}</div>
                   </div>
                   <div>
-                    <div className="mb-1 text-gray-500">Personal Real Estate Corporation Name</div>
-                    <div className="text-gray-900">{admin.personalRealEstateCorporationName || ""}</div>
+                    <div className="mb-1 text-gray-500 dark:text-gray-400">Personal Real Estate Corporation Name</div>
+                    <div className="text-gray-900 dark:text-white">{admin.personalRealEstateCorporationName || ""}</div>
                   </div>
                   <div>
-                    <div className="mb-1 text-gray-500">Licensed For</div>
-                    <div className="text-gray-900">{admin.licensedFor || ""}</div>
+                    <div className="mb-1 text-gray-500 dark:text-gray-400">Licensed For</div>
+                    <div className="text-gray-900 dark:text-white">{admin.licensedFor || ""}</div>
                   </div>
                   <div>
-                    <div className="mb-1 text-gray-500">Phone Number</div>
-                    <div className="text-gray-900">{admin.phoneNumber || ""}</div>
+                    <div className="mb-1 text-gray-500 dark:text-gray-400">Phone Number</div>
+                    <div className="text-gray-900 dark:text-white">{admin.phoneNumber || ""}</div>
                   </div>
                   <div>
-                    <div className="mb-1 text-gray-500">Team Name</div>
-                    <div className="text-gray-900">{admin.teamName || ""}</div>
+                    <div className="mb-1 text-gray-500 dark:text-gray-400">Team Name</div>
+                    <div className="text-gray-900 dark:text-white">{admin.teamName || ""}</div>
                   </div>
                   <div>
-                    <div className="mb-1 text-gray-500">About</div>
-                    <div className="whitespace-pre-wrap text-gray-900">{admin.aboutUs || ""}</div>
+                    <div className="mb-1 text-gray-500 dark:text-gray-400">About</div>
+                    <div className="whitespace-pre-wrap text-gray-900 dark:text-white">{admin.aboutUs || ""}</div>
                   </div>
                 </>
               )}
@@ -170,14 +170,14 @@ export default function AdministratorShowDrawer() {
               {/* Timestamps (render if present) */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <div className="mb-1 text-gray-500">Created</div>
-                  <div className="text-gray-900">
+                  <div className="mb-1 text-gray-500 dark:text-gray-400">Created</div>
+                  <div className="text-gray-900 dark:text-white">
                     {admin.createdAt ? new Date(admin.createdAt).toISOString().replace("T", " ").slice(0, 16) : ""}
                   </div>
                 </div>
                 <div>
-                  <div className="mb-1 text-gray-500">Updated</div>
-                  <div className="text-gray-900">
+                  <div className="mb-1 text-gray-500 dark:text-gray-400">Updated</div>
+                  <div className="text-gray-900 dark:text-white">
                     {admin.updatedAt ? new Date(admin.updatedAt).toISOString().replace("T", " ").slice(0, 16) : ""}
                   </div>
                 </div>
